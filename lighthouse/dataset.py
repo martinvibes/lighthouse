@@ -143,7 +143,8 @@ def build_windows(symbols: list[str]) -> list[Window]:
     return windows
 
 
-def observations(window: Window, when: dt.datetime, min_symbols: int = 8) -> dict | None:
+def observations(window: Window, when: dt.datetime, min_symbols: int = 8,
+                 exog: dict[str, list[Bar]] | None = None) -> dict | None:
     """Snapshot of what is knowable at time `when` inside a dark window."""
     syms = window.symbols()
     dark_ret: dict[str, float] = {}
@@ -155,11 +156,34 @@ def observations(window: Window, when: dt.datetime, min_symbols: int = 8) -> dic
     if len(dark_ret) < min_symbols:
         return None
     truth = {s: window.target[s] / window.anchor[s] - 1.0 for s in syms}
+    exog_ret = {}
+    for name, bars in (exog or {}).items():
+        r = exog_return(bars, window.start, when)
+        if r is not None:
+            exog_ret[name] = r
     return {
         "when": when,
         "kind": window.kind,
+        "exog": exog_ret,
         "elapsed": window.elapsed_fraction(when),
         "dark_ret": dark_ret,
         "truth": truth,
         "anchor": dict(window.anchor),
     }
+
+
+def load_exog(symbols: tuple[str, ...] = ("BTCUSDT", "ETHUSDT")) -> dict[str, list[Bar]]:
+    """24/7 reference series that keep trading through the dead zone."""
+    return {s: load_bars(s) for s in symbols}
+
+
+def exog_return(bars: list[Bar], start: dt.datetime, when: dt.datetime) -> float | None:
+    """Return of a 24/7 series from the dark-window start to `when`."""
+    before = [b for b in bars if b.t <= start]
+    upto = [b for b in bars if b.t <= when]
+    if not before or not upto:
+        return None
+    a, b = before[-1].close, upto[-1].close
+    if a <= 0:
+        return None
+    return b / a - 1.0
