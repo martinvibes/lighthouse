@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import Board from "@/components/Board";
 import Instrument from "@/components/Instrument";
 import TrustCurve from "@/components/TrustCurve";
+import BeamStrip from "@/components/BeamStrip";
 import { useDesk } from "@/lib/desk";
 import { fmtET } from "@/lib/time";
 
@@ -87,6 +88,8 @@ export default function DeskPage() {
         <Ribbon label="weekend p90" value={cal ? `${cal.weekend_gap.p90_bps.toFixed(0)} bps` : "—"}
                 sub="friday close → monday open" accent="var(--color-amber)" delay={0.24} />
       </section>
+
+      <Cell delay={0.28} className="mt-4"><BeamStrip /></Cell>
 
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-4">
         <Cell className="lg:col-span-8" delay={0.1}><Instrument /></Cell>

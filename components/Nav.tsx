@@ -11,6 +11,7 @@ const LINKS = [
   { href: "/collateral", label: "Collateral" },
   { href: "/research", label: "Research" },
   { href: "/record", label: "Record" },
+  { href: "/docs", label: "Docs" },
 ];
 
 export default function Nav() {
@@ -45,7 +46,7 @@ export default function Nav() {
               <Link
                 key={l.href}
                 href={l.href}
-                className="relative px-4 py-1.5 text-[13px] rounded-full transition-colors"
+                className="relative px-3.5 py-1.5 text-[13px] rounded-full transition-colors"
                 style={{ color: active ? "#07080a" : "var(--color-muted)" }}
               >
                 {active && (
@@ -92,6 +93,27 @@ export default function Nav() {
           >
             Desk
           </Link>
+        </div>
+      </div>
+
+      {/* small screens: the same routes as a scrollable row rather than nothing */}
+      <div className="md:hidden border-t border-[var(--color-line)] overflow-x-auto no-scrollbar">
+        <div className="flex gap-1 px-4 py-2 w-max">
+          {LINKS.map((l) => {
+            const active = l.href === "/" ? path === "/" : path.startsWith(l.href);
+            return (
+              <Link
+                key={l.href}
+                href={l.href}
+                className="px-3.5 py-1.5 text-[12.5px] rounded-full whitespace-nowrap transition-colors"
+                style={active
+                  ? { background: "var(--color-mint)", color: "#07080a", fontWeight: 600 }
+                  : { color: "var(--color-muted)", background: "rgba(255,255,255,0.03)" }}
+              >
+                {l.label}
+              </Link>
+            );
+          })}
         </div>
       </div>
     </motion.nav>

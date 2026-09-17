@@ -1,10 +1,14 @@
 "use client";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Eye, ShieldCheck, Layers, ArrowRight, MoonStar } from "lucide-react";
-import Spotlight from "@/components/Spotlight";
 import LivePreview from "@/components/LivePreview";
 import { useDesk } from "@/lib/desk";
+import { curveFor, exceedProb } from "@/lib/risk";
+
+// WebGL scan grid — the beam sweeping the dark. Client only, no SSR.
+const GridScan = dynamic(() => import("@/components/GridScan"), { ssr: false });
 
 const reveal = {
   initial: { opacity: 0, y: 24 },
@@ -29,7 +33,20 @@ export default function Landing() {
             WebkitMaskImage: "radial-gradient(120% 78% at 50% 34%, #000 38%, transparent 82%)",
           }}
         >
-          <Spotlight />
+          <GridScan
+            enableWebcam={false}
+            sensitivity={0.5}
+            lineThickness={1}
+            linesColor="#1f3a30"
+            gridScale={0.1}
+            scanColor="#4ee6a8"
+            scanOpacity={0.5}
+            scanDirection="forward"
+            enablePost
+            bloomIntensity={0.5}
+            chromaticAberration={0.0015}
+            noiseIntensity={0.012}
+          />
         </div>
 
         <div className="relative max-w-[1100px] mx-auto px-5 md:px-8 pt-24 md:pt-32 pb-16 text-center">
@@ -199,11 +216,29 @@ export default function Landing() {
       </section>
 
       <footer className="border-t border-[var(--color-line)]">
-        <div className="max-w-[1180px] mx-auto px-5 md:px-8 py-8 flex items-center justify-between flex-wrap gap-3">
-          <span className="display text-[18px]">
-            Light<span className="italic" style={{ color: "var(--color-mint)" }}>house</span>
-          </span>
-          <span className="label">measured · walk-forward · published in full · Bitget AI Base Camp S2</span>
+        <div className="max-w-[1180px] mx-auto px-5 md:px-8 py-12 grid grid-cols-2 md:grid-cols-4 gap-8">
+          <div className="col-span-2 md:col-span-1">
+            <span className="display text-[20px]">
+              Light<span className="italic" style={{ color: "var(--color-mint)" }}>house</span>
+            </span>
+            <p className="text-[12.5px] text-[var(--color-muted)] leading-relaxed mt-3 max-w-[220px]">
+              A measurement desk for the eight hours a night when tokenized US equities have a price but no
+              market behind it.
+            </p>
+          </div>
+          <FootCol title="the desk" links={[["Live board", "/desk"], ["Collateral risk", "/collateral"], ["Research", "/research"]]} />
+          <FootCol title="the evidence" links={[["The record", "/record"], ["Documentation", "/docs"], ["Ledger (CSV)", "/ledger.csv"]]} />
+          <FootCol title="the source" links={[["GitHub", "https://github.com/martinvibes/lighthouse"], ["Frozen calibration", "/calibration.json"], ["Error tails", "/tails.json"]]} />
+        </div>
+        <div className="border-t border-[var(--color-line)]">
+          <div className="max-w-[1180px] mx-auto px-5 md:px-8 py-5 flex items-center justify-between flex-wrap gap-3">
+            <span className="label">
+              measured · walk-forward · published in full
+            </span>
+            <span className="label">
+              not investment advice · no orders are placed · Bitget AI Base Camp S2
+            </span>
+          </div>
         </div>
       </footer>
     </main>
@@ -211,6 +246,21 @@ export default function Landing() {
 }
 
 /* ── bits ─────────────────────────────────────────────────────────────── */
+function FootCol({ title, links }: { title: string; links: [string, string][] }) {
+  return (
+    <div>
+      <div className="label mb-3">{title}</div>
+      <div className="flex flex-col gap-2">
+        {links.map(([l, h]) => (
+          <Link key={h} href={h} className="text-[13px] text-[var(--color-muted)] hover:text-[var(--color-mint)] transition-colors">
+            {l}
+          </Link>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function Stat({ k, v, c }: { k: string; v: string; c?: string }) {
   return (
     <div className="text-left">
@@ -296,39 +346,69 @@ function EvidenceVisual({ led }: { led: ReturnType<typeof useDesk>["led"] }) {
 }
 
 function MirageVisual({ cal }: { cal: ReturnType<typeof useDesk>["cal"] }) {
+  const { rows, tails, horizon } = useDesk();
   const g = cal?.weekend_gap;
+
+  // Price a real 100k book in the three deepest names, at a 95% haircut against 50k borrowed.
+  const deep = [...rows].sort((a, b) => b.volume - a.volume).slice(0, 3);
+  const legs = deep.map((r) => ({ r, qty: Math.max(1, Math.round(33_000 / r.quote)) }));
+  const V = legs.reduce((s2, l) => s2 + l.qty * l.r.quote, 0);
+  const F = legs.reduce((s2, l) => s2 + l.qty * l.r.fair, 0);
+  const debt = 50_000, haircut = 0.95;
+  const liq = debt / haircut;
+  const distVenue = V > 0 ? ((V - liq) / V) * 1e4 : 0;
+  const distFair = F > 0 ? ((F - liq) / F) * 1e4 : 0;
+
+  let pCross: number | null = null;
+  if (tails && legs.length) {
+    const grid = tails.grid.map(() => 0);
+    let w = 0;
+    for (const l of legs) {
+      const c = curveFor(tails, l.r.symbol, horizon);
+      if (!c) continue;
+      const v = l.qty * l.r.fair;
+      for (let i = 0; i < grid.length; i++) grid[i] += c[i] * v;
+      w += v;
+    }
+    if (w > 0) pCross = exceedProb(tails, grid.map((x) => x / w), Math.max(1, distFair)) / 2;
+  }
+  const sev = pCross === null ? "var(--color-faint)" : pCross > 0.1 ? "var(--color-danger)" : pCross > 0.03 ? "var(--color-amber)" : "var(--color-mint)";
+
   return (
     <div className="glass p-5">
       <div className="flex items-center justify-between mb-4">
-        <span className="label">collateral marked at 95%</span>
-        <span className="label" style={{ color: "var(--color-danger)" }}>exposed</span>
+        <span className="label">$100k in {legs.length ? legs.map((l) => l.r.ticker).join(" · ") : "rTokens"} · 95% haircut · $50k borrowed</span>
+        <span className="label" style={{ color: "var(--color-mint)" }}>live</span>
       </div>
       <div className="panel px-4 py-3.5 mb-3">
         <div className="label mb-1.5">chance the reopen crosses your liquidation</div>
-        <div className="tnum text-[34px] leading-none" style={{ color: "var(--color-danger)" }}>11.4%</div>
+        <div className="tnum text-[34px] leading-none" style={{ color: sev, textShadow: `0 0 26px ${sev}44` }}>
+          {pCross === null ? "—" : `${(pCross * 100).toFixed(1)}%`}
+        </div>
         <div className="text-[11.5px] text-[var(--color-muted)] mt-1.5">
-          read off the measured error tails for the names actually held
+          read off the measured error tails for these exact names
         </div>
       </div>
       <div className="grid grid-cols-2 gap-3">
         <div className="panel px-3.5 py-3">
           <div className="label">venue says</div>
-          <div className="tnum text-[17px] mt-1">412 bps of room</div>
+          <div className="tnum text-[17px] mt-1">{V ? `${distVenue.toFixed(0)} bps` : "—"}</div>
+          <div className="label mt-0.5">of room</div>
         </div>
         <div className="panel px-3.5 py-3">
           <div className="label">history says</div>
-          <div className="tnum text-[17px] mt-1" style={{ color: "var(--color-amber)" }}>287 bps</div>
+          <div className="tnum text-[17px] mt-1" style={{ color: "var(--color-amber)" }}>{F ? `${distFair.toFixed(0)} bps` : "—"}</div>
+          <div className="label mt-0.5">of room</div>
         </div>
       </div>
       {g && (
-        <div className="flex items-center justify-between mt-4">
+        <div className="flex items-center justify-between mt-4 pt-3 border-t border-[var(--color-line)]">
           <span className="label">weekends repricing past 200 bps</span>
           <span className="tnum text-[13px]" style={{ color: "var(--color-danger)" }}>
             {(g.share_over_200bps * 100).toFixed(0)}%
           </span>
         </div>
       )}
-      <div className="label mt-3">illustrative figures · your own book is priced live on the collateral page</div>
     </div>
   );
 }

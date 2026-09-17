@@ -11,6 +11,9 @@ importers:
       '@tailwindcss/postcss':
         specifier: ^4.3.3
         version: 4.3.3
+      face-api.js:
+        specifier: ^0.22.2
+        version: 0.22.2
       framer-motion:
         specifier: ^13.4.0
         version: 13.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
@@ -23,6 +26,9 @@ importers:
       next:
         specifier: 16.3.5
         version: 16.3.5(@types/node@22.10.2)(react-dom@19.0.0(react@19.0.0))(react@19.0.0)
+      postprocessing:
+        specifier: ^6.39.5
+        version: 6.39.5(three@0.186.0)
       react:
         specifier: 19.0.0
         version: 19.0.0
@@ -32,6 +38,9 @@ importers:
       tailwindcss:
         specifier: ^4.3.3
         version: 4.3.3
+      three:
+        specifier: ^0.186.0
+        version: 0.186.0
     devDependencies:
       '@types/node':
         specifier: 22.10.2
@@ -42,6 +51,9 @@ importers:
       '@types/react-dom':
         specifier: 19.0.2
         version: 19.0.2(@types/react@19.0.2)
+      '@types/three':
+        specifier: ^0.186.0
+        version: 0.186.0
       typescript:
         specifier: 5.7.2
         version: 5.7.2
@@ -51,6 +63,9 @@ packages:
   '@alloc/quick-lru@5.3.0':
     resolution: {integrity: sha512-U4+70Pc5ZS9osnCBCE5Jha/ciHM+Yp+CNMNC/7HvYbNRk1Ldd+f7qO65W5qfhu/TCv+/ozljlXXe9Nj8419DMA==}
     engines: {node: '>=10'}
+
+  '@dimforge/rapier3d-compat@0.12.0':
+    resolution: {integrity: sha512-uekIGetywIgopfD97oDL5PfeezkFpNhwlzlaEYNOA0N6ghdsOvh/HYjSMek5Q2O1PYvRSDFcqFVJl4r4ZBwOow==}
 
   '@emnapi/runtime@1.11.3':
     resolution: {integrity: sha512-Xz4Tpyki7XyrpbUK1jR1AhdAdaXyhhY4lZ3neLodmhpuWfy2PAQN5B46sAiU4liOXGLkHypn/qU+jvfWSCYYLA==}
@@ -383,8 +398,18 @@ packages:
   '@tailwindcss/postcss@4.3.3':
     resolution: {integrity: sha512-JTSZZGQi1AyKirbLN3azmjVzef92tcX7h+iSqPdaeStyFpGpDlKvvpxeOE8njhbUanbRwr3z8DyzhICWnMtQeg==}
 
+  '@tensorflow/tfjs-core@1.7.0':
+    resolution: {integrity: sha512-uwQdiklNjqBnHPeseOdG0sGxrI3+d6lybaKu2+ou3ajVeKdPEwpWbgqA6iHjq1iylnOGkgkbbnQ6r2lwkiIIHw==}
+    engines: {yarn: '>= 1.3.2'}
+
+  '@tweenjs/tween.js@23.1.3':
+    resolution: {integrity: sha512-vJmvvwFxYuGnF2axRtPYocag6Clbb5YS7kLL+SO/TeVFzHqDIWrNKYtcsPMibjDx9O+bu+psAy9NKfWklassUA==}
+
   '@types/node@22.10.2':
     resolution: {integrity: sha512-Xxr6BBRCAOQixvonOye19wnzyDiUtTeqldOOmj3CkeblonbccA12PFwlufvRdrpjXxqnmUaeiU5EOA+7s5diUQ==}
+
+  '@types/offscreencanvas@2019.3.0':
+    resolution: {integrity: sha512-esIJx9bQg+QYF0ra8GnvfianIY8qWB0GBx54PK5Eps6m+xTj86KLavHv6qDhzKcu5UUOgNfJ2pWaIIV7TRUd9Q==}
 
   '@types/react-dom@19.0.2':
     resolution: {integrity: sha512-c1s+7TKFaDRRxr1TxccIX2u7sfCnc3RxkVyBIUA2lCpyqCF+QoAwQ/CBg7bsMdVwP120HEH143VQezKtef5nCg==}
@@ -393,6 +418,24 @@ packages:
 
   '@types/react@19.0.2':
     resolution: {integrity: sha512-USU8ZI/xyKJwFTpjSVIrSeHBVAGagkHQKPNbxeWwql/vDmnTIBgx+TJnhFnj1NXgz8XfprU0egV2dROLGpsBEg==}
+
+  '@types/seedrandom@2.4.27':
+    resolution: {integrity: sha512-YvMLqFak/7rt//lPBtEHv3M4sRNA+HGxrhFZ+DQs9K2IkYJbNwVIb8avtJfhDiuaUBX/AW0jnjv48FV8h3u9bQ==}
+
+  '@types/stats.js@0.17.4':
+    resolution: {integrity: sha512-jIBvWWShCvlBqBNIZt0KAshWpvSjhkwkEu4ZUcASoAvhmrgAUI2t1dXrjSL4xXVLB4FznPrIsX3nKXFl/Dt4vA==}
+
+  '@types/three@0.186.0':
+    resolution: {integrity: sha512-mxYSBpDC+D0pLfSP6sW4WZTcT+nrtmZcimMqnVmy36Hte3XpeYSrvgg4TRdaM1GemGog1AWzI5qL2VoIfMXbJQ==}
+
+  '@types/webgl-ext@0.0.30':
+    resolution: {integrity: sha512-LKVgNmBxN0BbljJrVUwkxwRYqzsAEPcZOe6S2T6ZaBDIrFp0qu4FNlpc5sM1tGbXUYFgdVQIoeLk1Y1UoblyEg==}
+
+  '@types/webgl2@0.0.4':
+    resolution: {integrity: sha512-PACt1xdErJbMUOUweSrbVM7gSIYm1vTncW2hF6Os/EeWi6TXYAYMPp+8v6rzHmypE5gHrxaxZNXgMkJVIdZpHw==}
+
+  '@types/webxr@0.5.24':
+    resolution: {integrity: sha512-h8fgEd/DpoS9CBrjEQXR+dIDraopAEfu4wYVNY2tEPwk60stPWhvZMf4Foo5FakuQ7HFZoa8WceaWFervK2Ovg==}
 
   baseline-browser-mapping@2.11.24:
     resolution: {integrity: sha512-hYrgxie335U08WqICoGqKRzV1HFXv6zdxwJE4ekCb80CM9a0SVVsN4QPwT67RraRo+9h8IATk6uxHJw7QSkdOg==}
@@ -416,8 +459,14 @@ packages:
     resolution: {integrity: sha512-nGXts5znJzmWPu+mIE9izCOzdg63oJca2mDzGWWTth7sr4aCToKcoyFVBQwN75Ij5Pf6p510EwkTqViTRzDV+w==}
     engines: {node: '>=10.13.0'}
 
+  face-api.js@0.22.2:
+    resolution: {integrity: sha512-9Bbv/yaBRTKCXjiDqzryeKhYxmgSjJ7ukvOvEBy6krA0Ah/vNBlsf7iBNfJljWiPA8Tys1/MnB3lyP2Hfmsuyw==}
+
   fancy-canvas@2.1.0:
     resolution: {integrity: sha512-nifxXJ95JNLFR2NgRV4/MxVP45G9909wJTEKz5fg/TZS20JJZA6hfgRVh/bC9bwl2zBtBNcYPjiBE4njQHVBwQ==}
+
+  fflate@0.8.3:
+    resolution: {integrity: sha512-tbZNuJrLwGUp3zshBtdy4W+ORxZuIh8a5ilyIEQDC5rY1f3U20JMry0Ll3WBzU58EZKsEuJFXhb5gwv8CsPvgA==}
 
   framer-motion@13.4.0:
     resolution: {integrity: sha512-HCpqKM9BTu6UYKtj0u6J1QNxojnnirNcghcSDZ+SkpiL3myxvtsgXPS3ZGEELC2eSma7YiA937rAEXtRyydSXQ==}
@@ -522,6 +571,9 @@ packages:
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
 
+  meshoptimizer@1.1.1:
+    resolution: {integrity: sha512-oRFNWJRDA/WTrVj7NWvqa5HqE1t9MYDj2VaWirQCzCCrAd2GHrqR/sQezCxiWATPNlKTcRaPRHPJwIRoPBAp5g==}
+
   motion-dom@13.3.0:
     resolution: {integrity: sha512-AmAnB6pHdZ1vHGzWzuzteG6Q3j1lHKeX/lbST6jGlgm0cjvLUgaCk1xhOuPMOy5SgovN6wnnUdwFrkcsus7Ftg==}
 
@@ -554,12 +606,21 @@ packages:
       sass:
         optional: true
 
+  node-fetch@2.1.2:
+    resolution: {integrity: sha512-IHLHYskTc2arMYsHZH82PVX8CSKT5lzb7AXeyO06QnjGDKtkv+pv3mEki6S7reB/x1QPo+YPxQRNEVgR5V/w3Q==}
+    engines: {node: 4.x || >=6.0.0}
+
   picocolors@1.1.1:
     resolution: {integrity: sha512-xceH2snhtb5M9liqDsmEw56le376mTZkEX/jEb/RxNFyegNul7eNslCXP9FDj/Lcu0X8KEyMceP2ntpaHrDEVA==}
 
   postcss@8.5.23:
     resolution: {integrity: sha512-g50586zr4bZmwFiTlflMu8E0bDTb5I5gertgwAKmsdUlTQIhZtunzUlD1WSzwcVWPoAVpsrA6vlfCD7oXvRwgg==}
     engines: {node: ^10 || ^12 || >=14}
+
+  postprocessing@6.39.5:
+    resolution: {integrity: sha512-YmH+t74J2X1lwYjKzK/tgs9C9kqWWPB9JwZiDF5mEf4BdCEAmEFbO8lXBA7NM0/j4g+x6FgD/Tt5/kT7ogbEDA==}
+    peerDependencies:
+      three: '>= 0.168.0 < 0.187.0'
 
   react-dom@19.0.0:
     resolution: {integrity: sha512-4GV5sHFG0e/0AD4X+ySy6UJd3jVl1iNsNHdpad0qhABJ11twS3TTBnseqsKurKcsNqCEFeGL3uLpVChpIO3QfQ==}
@@ -572,6 +633,9 @@ packages:
 
   scheduler@0.25.0:
     resolution: {integrity: sha512-xFVuu11jh+xcO7JOAGJNOXld8/TcEHK/4CituBUeUb5hqxJLj9YuemAEuvm9gQ/+pgXYfbQuqAkiYu+u7YEsNA==}
+
+  seedrandom@2.4.3:
+    resolution: {integrity: sha512-2CkZ9Wn2dS4mMUWQaXLsOAfGD+irMlLEeSP3cMxpGbgyOOzJGFa+MWCOMTOCMyZinHRPxyOj/S/C57li/1to6Q==}
 
   semver@7.8.5:
     resolution: {integrity: sha512-Y7/KDsb8LjooZpwaqGyulO6DQlksgCncchHGk+sZIY4SBvUocMBEFH5Ur1fI4dV+Jvl0w6cjvucaIi40puRioA==}
@@ -611,6 +675,12 @@ packages:
     resolution: {integrity: sha512-uxc/zpqFg6x7C8vOE7lh6Lbda8eEL9zmVm/PLeTPBRhh1xCgdWaQ+J1CUieGpIfm2HdtsUpRv+HshiasBMcc6A==}
     engines: {node: '>=6'}
 
+  three@0.186.0:
+    resolution: {integrity: sha512-cr/fIM2ddMSVbYVgkfD4jLJv7Fh/8ZTjvo+7gQeSVGUZHxpx9FDwoL5iC7hUz/LiRA8wMbqfnb90xKfm1/HHkQ==}
+
+  tslib@1.14.1:
+    resolution: {integrity: sha512-Xni35NKzjgMrwevysHTCArtLDpPvye8zV/0E4EyYn43P7/7qvQwPh9BGkHewbMulVntbigmcT7rdX3BNo9wRJg==}
+
   tslib@2.8.1:
     resolution: {integrity: sha512-oJFu94HQb+KVduSUQL7wnpmqnfmLsOA/nAh6b6EH0wCEoK0/mPeXU6c3wKDV83MkOuHPRHtSXKKU99IBazS/2w==}
 
@@ -625,6 +695,8 @@ packages:
 snapshots:
 
   '@alloc/quick-lru@5.3.0': {}
+
+  '@dimforge/rapier3d-compat@0.12.0': {}
 
   '@emnapi/runtime@1.11.3':
     dependencies:
@@ -856,9 +928,22 @@ snapshots:
       postcss: 8.5.23
       tailwindcss: 4.3.3
 
+  '@tensorflow/tfjs-core@1.7.0':
+    dependencies:
+      '@types/offscreencanvas': 2019.3.0
+      '@types/seedrandom': 2.4.27
+      '@types/webgl-ext': 0.0.30
+      '@types/webgl2': 0.0.4
+      node-fetch: 2.1.2
+      seedrandom: 2.4.3
+
+  '@tweenjs/tween.js@23.1.3': {}
+
   '@types/node@22.10.2':
     dependencies:
       undici-types: 6.20.0
+
+  '@types/offscreencanvas@2019.3.0': {}
 
   '@types/react-dom@19.0.2(@types/react@19.0.2)':
     dependencies:
@@ -867,6 +952,25 @@ snapshots:
   '@types/react@19.0.2':
     dependencies:
       csstype: 3.2.3
+
+  '@types/seedrandom@2.4.27': {}
+
+  '@types/stats.js@0.17.4': {}
+
+  '@types/three@0.186.0':
+    dependencies:
+      '@dimforge/rapier3d-compat': 0.12.0
+      '@tweenjs/tween.js': 23.1.3
+      '@types/stats.js': 0.17.4
+      '@types/webxr': 0.5.24
+      fflate: 0.8.3
+      meshoptimizer: 1.1.1
+
+  '@types/webgl-ext@0.0.30': {}
+
+  '@types/webgl2@0.0.4': {}
+
+  '@types/webxr@0.5.24': {}
 
   baseline-browser-mapping@2.11.24: {}
 
@@ -883,7 +987,14 @@ snapshots:
       graceful-fs: 4.2.11
       tapable: 2.3.3
 
+  face-api.js@0.22.2:
+    dependencies:
+      '@tensorflow/tfjs-core': 1.7.0
+      tslib: 1.14.1
+
   fancy-canvas@2.1.0: {}
+
+  fflate@0.8.3: {}
 
   framer-motion@13.4.0(react-dom@19.0.0(react@19.0.0))(react@19.0.0):
     dependencies:
@@ -959,6 +1070,8 @@ snapshots:
     dependencies:
       '@jridgewell/sourcemap-codec': 1.6.0
 
+  meshoptimizer@1.1.1: {}
+
   motion-dom@13.3.0:
     dependencies:
       motion-utils: 13.3.0
@@ -992,6 +1105,8 @@ snapshots:
       - '@types/node'
       - babel-plugin-macros
 
+  node-fetch@2.1.2: {}
+
   picocolors@1.1.1: {}
 
   postcss@8.5.23:
@@ -999,6 +1114,10 @@ snapshots:
       nanoid: 3.3.19
       picocolors: 1.1.1
       source-map-js: 1.2.1
+
+  postprocessing@6.39.5(three@0.186.0):
+    dependencies:
+      three: 0.186.0
 
   react-dom@19.0.0(react@19.0.0):
     dependencies:
@@ -1008,6 +1127,8 @@ snapshots:
   react@19.0.0: {}
 
   scheduler@0.25.0: {}
+
+  seedrandom@2.4.3: {}
 
   semver@7.8.5:
     optional: true
@@ -1056,6 +1177,10 @@ snapshots:
   tailwindcss@4.3.3: {}
 
   tapable@2.3.3: {}
+
+  three@0.186.0: {}
+
+  tslib@1.14.1: {}
 
   tslib@2.8.1: {}
 
