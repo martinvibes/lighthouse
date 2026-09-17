@@ -2,12 +2,23 @@
 import glob, json, os, sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import numpy as np
-from lighthouse import dataset, models, score
+from lighthouse import dataset, ledger, models, score
 
 syms = sorted(os.path.basename(p).replace("_1h.json", "") for p in glob.glob("data/cache/*_1h.json") if os.path.basename(p).startswith("R"))
 windows = dataset.build_windows(syms)
 overnight = [w for w in windows if w.kind == "overnight"]
 weekend = [w for w in windows if w.kind == "weekend"]
+
+# Drop books that never reprice across the dark window: they are stale quotes,
+# not cheap information, and they would flatter every aggregate.
+active = set(ledger.active_symbols(overnight))
+for w in windows:
+    for s2 in list(w.anchor):
+        if s2 not in active:
+            w.anchor.pop(s2, None); w.target.pop(s2, None); w.quotes.pop(s2, None)
+overnight = [w for w in overnight if len(w.symbols()) >= 8]
+weekend = [w for w in weekend if len(w.symbols()) >= 8]
+syms = sorted(active)
 
 # Calibrate on the most recent snapshots across the whole dark window.
 train = []
@@ -40,6 +51,7 @@ wg = np.array(weekend_gap)
 out = {
     "generated_utc": __import__("datetime").datetime.now(__import__("datetime").timezone.utc).isoformat(timespec="seconds"),
     "universe": syms,
+    "universe_dropped_stale": sorted(set(os.path.basename(p).replace("_1h.json","") for p in glob.glob("data/cache/*_1h.json") if os.path.basename(p).startswith("R")) - active),
     "n_windows": {"overnight": len(overnight), "weekend": len(weekend)},
     "span": [str(windows[0].start.date()), str(windows[-1].end.date())],
     "edges": list(cal.EDGES),

@@ -1,0 +1,547 @@
+{
+  "summary": {
+    "n_rows": 20934,
+    "by_horizon": {
+      "0.25": {
+        "n": 5214,
+        "lighthouse_medae": 29.05,
+        "venue_medae": 33.39,
+        "last_close_medae": 32.53,
+        "lighthouse_vs_lastclose_pct": -10.7,
+        "lighthouse_beats_venue_share": 0.552
+      },
+      "0.50": {
+        "n": 5234,
+        "lighthouse_medae": 26.28,
+        "venue_medae": 30.73,
+        "last_close_medae": 32.36,
+        "lighthouse_vs_lastclose_pct": -18.8,
+        "lighthouse_beats_venue_share": 0.565
+      },
+      "0.75": {
+        "n": 5243,
+        "lighthouse_medae": 22.56,
+        "venue_medae": 25.13,
+        "last_close_medae": 32.33,
+        "lighthouse_vs_lastclose_pct": -30.2,
+        "lighthouse_beats_venue_share": 0.562
+      },
+      "0.90": {
+        "n": 5243,
+        "lighthouse_medae": 19.38,
+        "venue_medae": 19.84,
+        "last_close_medae": 32.33,
+        "lighthouse_vs_lastclose_pct": -40.1,
+        "lighthouse_beats_venue_share": 0.535
+      }
+    }
+  },
+  "per_symbol": [
+    {
+      "symbol": "RLITEUSDT",
+      "ticker": "LITE",
+      "n": 464,
+      "lighthouse": 42.1,
+      "venue": 68.4,
+      "last_close": 97.0,
+      "vs_lastclose_pct": -56.6,
+      "beat_venue_share": 0.547,
+      "median_realised_bps": 97.0
+    },
+    {
+      "symbol": "RMUUSDT",
+      "ticker": "MU",
+      "n": 420,
+      "lighthouse": 52.0,
+      "venue": 40.1,
+      "last_close": 107.0,
+      "vs_lastclose_pct": -51.4,
+      "beat_venue_share": 0.417,
+      "median_realised_bps": 107.0
+    },
+    {
+      "symbol": "RTQQQUSDT",
+      "ticker": "TQQQ",
+      "n": 464,
+      "lighthouse": 47.3,
+      "venue": 34.4,
+      "last_close": 85.3,
+      "vs_lastclose_pct": -44.6,
+      "beat_venue_share": 0.422,
+      "median_realised_bps": 85.3
+    },
+    {
+      "symbol": "RCOHRUSDT",
+      "ticker": "COHR",
+      "n": 456,
+      "lighthouse": 80.3,
+      "venue": 71.0,
+      "last_close": 137.2,
+      "vs_lastclose_pct": -41.5,
+      "beat_venue_share": 0.443,
+      "median_realised_bps": 137.2
+    },
+    {
+      "symbol": "RCDEUSDT",
+      "ticker": "CDE",
+      "n": 460,
+      "lighthouse": 66.1,
+      "venue": 50.5,
+      "last_close": 109.3,
+      "vs_lastclose_pct": -39.6,
+      "beat_venue_share": 0.422,
+      "median_realised_bps": 109.3
+    },
+    {
+      "symbol": "RSMCIUSDT",
+      "ticker": "SMCI",
+      "n": 464,
+      "lighthouse": 41.5,
+      "venue": 39.3,
+      "last_close": 68.1,
+      "vs_lastclose_pct": -39.0,
+      "beat_venue_share": 0.55,
+      "median_realised_bps": 68.1
+    },
+    {
+      "symbol": "RHOODUSDT",
+      "ticker": "HOOD",
+      "n": 464,
+      "lighthouse": 36.2,
+      "venue": 35.1,
+      "last_close": 57.5,
+      "vs_lastclose_pct": -37.0,
+      "beat_venue_share": 0.543,
+      "median_realised_bps": 57.5
+    },
+    {
+      "symbol": "RHLUSDT",
+      "ticker": "HL",
+      "n": 443,
+      "lighthouse": 60.2,
+      "venue": 52.9,
+      "last_close": 95.4,
+      "vs_lastclose_pct": -36.9,
+      "beat_venue_share": 0.427,
+      "median_realised_bps": 95.4
+    },
+    {
+      "symbol": "RGEVUSDT",
+      "ticker": "GEV",
+      "n": 440,
+      "lighthouse": 15.2,
+      "venue": 30.3,
+      "last_close": 23.7,
+      "vs_lastclose_pct": -35.7,
+      "beat_venue_share": 0.695,
+      "median_realised_bps": 23.7
+    },
+    {
+      "symbol": "RORCLUSDT",
+      "ticker": "ORCL",
+      "n": 464,
+      "lighthouse": 28.2,
+      "venue": 31.9,
+      "last_close": 43.1,
+      "vs_lastclose_pct": -34.5,
+      "beat_venue_share": 0.537,
+      "median_realised_bps": 43.1
+    },
+    {
+      "symbol": "RVOOUSDT",
+      "ticker": "VOO",
+      "n": 468,
+      "lighthouse": 9.4,
+      "venue": 7.4,
+      "last_close": 14.1,
+      "vs_lastclose_pct": -33.4,
+      "beat_venue_share": 0.425,
+      "median_realised_bps": 14.1
+    },
+    {
+      "symbol": "RNBISUSDT",
+      "ticker": "NBIS",
+      "n": 464,
+      "lighthouse": 55.9,
+      "venue": 56.3,
+      "last_close": 83.8,
+      "vs_lastclose_pct": -33.3,
+      "beat_venue_share": 0.534,
+      "median_realised_bps": 83.8
+    },
+    {
+      "symbol": "RSNDKUSDT",
+      "ticker": "SNDK",
+      "n": 464,
+      "lighthouse": 63.3,
+      "venue": 54.1,
+      "last_close": 94.1,
+      "vs_lastclose_pct": -32.8,
+      "beat_venue_share": 0.489,
+      "median_realised_bps": 94.1
+    },
+    {
+      "symbol": "RSOXLUSDT",
+      "ticker": "SOXL",
+      "n": 452,
+      "lighthouse": 107.3,
+      "venue": 82.5,
+      "last_close": 159.5,
+      "vs_lastclose_pct": -32.7,
+      "beat_venue_share": 0.449,
+      "median_realised_bps": 159.5
+    },
+    {
+      "symbol": "RSOXXUSDT",
+      "ticker": "SOXX",
+      "n": 464,
+      "lighthouse": 31.1,
+      "venue": 35.2,
+      "last_close": 46.1,
+      "vs_lastclose_pct": -32.6,
+      "beat_venue_share": 0.543,
+      "median_realised_bps": 46.1
+    },
+    {
+      "symbol": "RBABAUSDT",
+      "ticker": "BABA",
+      "n": 464,
+      "lighthouse": 37.6,
+      "venue": 46.8,
+      "last_close": 54.3,
+      "vs_lastclose_pct": -30.6,
+      "beat_venue_share": 0.578,
+      "median_realised_bps": 54.3
+    },
+    {
+      "symbol": "RIVVUSDT",
+      "ticker": "IVV",
+      "n": 448,
+      "lighthouse": 8.5,
+      "venue": 9.5,
+      "last_close": 12.1,
+      "vs_lastclose_pct": -30.0,
+      "beat_venue_share": 0.511,
+      "median_realised_bps": 12.1
+    },
+    {
+      "symbol": "RSPYUSDT",
+      "ticker": "SPY",
+      "n": 464,
+      "lighthouse": 9.5,
+      "venue": 7.3,
+      "last_close": 13.6,
+      "vs_lastclose_pct": -29.9,
+      "beat_venue_share": 0.444,
+      "median_realised_bps": 13.6
+    },
+    {
+      "symbol": "RCRMUSDT",
+      "ticker": "CRM",
+      "n": 456,
+      "lighthouse": 14.4,
+      "venue": 21.8,
+      "last_close": 20.4,
+      "vs_lastclose_pct": -29.3,
+      "beat_venue_share": 0.64,
+      "median_realised_bps": 20.4
+    },
+    {
+      "symbol": "RCRWVUSDT",
+      "ticker": "CRWV",
+      "n": 464,
+      "lighthouse": 50.2,
+      "venue": 52.8,
+      "last_close": 70.4,
+      "vs_lastclose_pct": -28.6,
+      "beat_venue_share": 0.53,
+      "median_realised_bps": 70.4
+    },
+    {
+      "symbol": "RTLTUSDT",
+      "ticker": "TLT",
+      "n": 464,
+      "lighthouse": 5.8,
+      "venue": 8.0,
+      "last_close": 8.1,
+      "vs_lastclose_pct": -27.9,
+      "beat_venue_share": 0.597,
+      "median_realised_bps": 8.1
+    },
+    {
+      "symbol": "RMRVLUSDT",
+      "ticker": "MRVL",
+      "n": 468,
+      "lighthouse": 47.4,
+      "venue": 43.2,
+      "last_close": 65.6,
+      "vs_lastclose_pct": -27.8,
+      "beat_venue_share": 0.519,
+      "median_realised_bps": 65.6
+    },
+    {
+      "symbol": "RNOWUSDT",
+      "ticker": "NOW",
+      "n": 464,
+      "lighthouse": 27.5,
+      "venue": 33.7,
+      "last_close": 37.8,
+      "vs_lastclose_pct": -27.4,
+      "beat_venue_share": 0.545,
+      "median_realised_bps": 37.8
+    },
+    {
+      "symbol": "RMSFTUSDT",
+      "ticker": "MSFT",
+      "n": 464,
+      "lighthouse": 15.1,
+      "venue": 15.3,
+      "last_close": 20.7,
+      "vs_lastclose_pct": -27.0,
+      "beat_venue_share": 0.487,
+      "median_realised_bps": 20.7
+    },
+    {
+      "symbol": "RTSLAUSDT",
+      "ticker": "TSLA",
+      "n": 468,
+      "lighthouse": 22.8,
+      "venue": 20.4,
+      "last_close": 30.6,
+      "vs_lastclose_pct": -25.5,
+      "beat_venue_share": 0.442,
+      "median_realised_bps": 30.6
+    },
+    {
+      "symbol": "RGOOGLUSDT",
+      "ticker": "GOOGL",
+      "n": 468,
+      "lighthouse": 17.8,
+      "venue": 18.2,
+      "last_close": 23.8,
+      "vs_lastclose_pct": -25.3,
+      "beat_venue_share": 0.549,
+      "median_realised_bps": 23.8
+    },
+    {
+      "symbol": "RPATHUSDT",
+      "ticker": "PATH",
+      "n": 464,
+      "lighthouse": 28.7,
+      "venue": 28.2,
+      "last_close": 36.0,
+      "vs_lastclose_pct": -20.2,
+      "beat_venue_share": 0.506,
+      "median_realised_bps": 36.0
+    },
+    {
+      "symbol": "RINTCUSDT",
+      "ticker": "INTC",
+      "n": 468,
+      "lighthouse": 49.7,
+      "venue": 42.7,
+      "last_close": 62.0,
+      "vs_lastclose_pct": -19.9,
+      "beat_venue_share": 0.532,
+      "median_realised_bps": 62.0
+    },
+    {
+      "symbol": "RAMDUSDT",
+      "ticker": "AMD",
+      "n": 468,
+      "lighthouse": 31.1,
+      "venue": 40.7,
+      "last_close": 38.1,
+      "vs_lastclose_pct": -18.4,
+      "beat_venue_share": 0.571,
+      "median_realised_bps": 38.1
+    },
+    {
+      "symbol": "ROKLOUSDT",
+      "ticker": "OKLO",
+      "n": 464,
+      "lighthouse": 45.4,
+      "venue": 46.6,
+      "last_close": 54.2,
+      "vs_lastclose_pct": -16.3,
+      "beat_venue_share": 0.575,
+      "median_realised_bps": 54.2
+    },
+    {
+      "symbol": "RQQQUSDT",
+      "ticker": "QQQ",
+      "n": 468,
+      "lighthouse": 17.0,
+      "venue": 13.2,
+      "last_close": 20.2,
+      "vs_lastclose_pct": -15.7,
+      "beat_venue_share": 0.502,
+      "median_realised_bps": 20.2
+    },
+    {
+      "symbol": "RMETAUSDT",
+      "ticker": "META",
+      "n": 464,
+      "lighthouse": 17.2,
+      "venue": 18.1,
+      "last_close": 20.3,
+      "vs_lastclose_pct": -15.5,
+      "beat_venue_share": 0.569,
+      "median_realised_bps": 20.3
+    },
+    {
+      "symbol": "RSTXUSDT",
+      "ticker": "STX",
+      "n": 436,
+      "lighthouse": 39.3,
+      "venue": 61.3,
+      "last_close": 45.6,
+      "vs_lastclose_pct": -13.8,
+      "beat_venue_share": 0.626,
+      "median_realised_bps": 45.6
+    },
+    {
+      "symbol": "RDELLUSDT",
+      "ticker": "DELL",
+      "n": 432,
+      "lighthouse": 24.8,
+      "venue": 41.7,
+      "last_close": 28.2,
+      "vs_lastclose_pct": -12.3,
+      "beat_venue_share": 0.688,
+      "median_realised_bps": 28.2
+    },
+    {
+      "symbol": "RAVGOUSDT",
+      "ticker": "AVGO",
+      "n": 468,
+      "lighthouse": 29.3,
+      "venue": 27.8,
+      "last_close": 31.1,
+      "vs_lastclose_pct": -5.9,
+      "beat_venue_share": 0.573,
+      "median_realised_bps": 31.1
+    },
+    {
+      "symbol": "RQCOMUSDT",
+      "ticker": "QCOM",
+      "n": 448,
+      "lighthouse": 26.4,
+      "venue": 42.0,
+      "last_close": 27.8,
+      "vs_lastclose_pct": -5.0,
+      "beat_venue_share": 0.636,
+      "median_realised_bps": 27.8
+    },
+    {
+      "symbol": "RPLTRUSDT",
+      "ticker": "PLTR",
+      "n": 468,
+      "lighthouse": 29.3,
+      "venue": 29.2,
+      "last_close": 30.5,
+      "vs_lastclose_pct": -4.0,
+      "beat_venue_share": 0.543,
+      "median_realised_bps": 30.5
+    },
+    {
+      "symbol": "RAAPLUSDT",
+      "ticker": "AAPL",
+      "n": 464,
+      "lighthouse": 12.2,
+      "venue": 11.5,
+      "last_close": 12.5,
+      "vs_lastclose_pct": -2.7,
+      "beat_venue_share": 0.578,
+      "median_realised_bps": 12.5
+    },
+    {
+      "symbol": "RAMZNUSDT",
+      "ticker": "AMZN",
+      "n": 464,
+      "lighthouse": 13.2,
+      "venue": 15.7,
+      "last_close": 13.5,
+      "vs_lastclose_pct": -2.7,
+      "beat_venue_share": 0.61,
+      "median_realised_bps": 13.5
+    },
+    {
+      "symbol": "RVUSDT",
+      "ticker": "V",
+      "n": 428,
+      "lighthouse": 5.1,
+      "venue": 11.7,
+      "last_close": 5.0,
+      "vs_lastclose_pct": 1.6,
+      "beat_venue_share": 0.743,
+      "median_realised_bps": 5.0
+    },
+    {
+      "symbol": "RNVDAUSDT",
+      "ticker": "NVDA",
+      "n": 432,
+      "lighthouse": 25.5,
+      "venue": 20.8,
+      "last_close": 24.1,
+      "vs_lastclose_pct": 5.7,
+      "beat_venue_share": 0.528,
+      "median_realised_bps": 24.1
+    },
+    {
+      "symbol": "RMELIUSDT",
+      "ticker": "MELI",
+      "n": 385,
+      "lighthouse": 9.8,
+      "venue": 21.1,
+      "last_close": 9.2,
+      "vs_lastclose_pct": 6.3,
+      "beat_venue_share": 0.706,
+      "median_realised_bps": 9.2
+    },
+    {
+      "symbol": "RSPCXUSDT",
+      "ticker": "SPCX",
+      "n": 208,
+      "lighthouse": 42.6,
+      "venue": 24.9,
+      "last_close": 40.0,
+      "vs_lastclose_pct": 6.5,
+      "beat_venue_share": 0.433,
+      "median_realised_bps": 40.0
+    },
+    {
+      "symbol": "RJPMUSDT",
+      "ticker": "JPM",
+      "n": 452,
+      "lighthouse": 6.5,
+      "venue": 11.4,
+      "last_close": 6.1,
+      "vs_lastclose_pct": 6.8,
+      "beat_venue_share": 0.699,
+      "median_realised_bps": 6.1
+    },
+    {
+      "symbol": "RAXPUSDT",
+      "ticker": "AXP",
+      "n": 347,
+      "lighthouse": 7.6,
+      "venue": 18.6,
+      "last_close": 6.9,
+      "vs_lastclose_pct": 10.0,
+      "beat_venue_share": 0.738,
+      "median_realised_bps": 6.9
+    },
+    {
+      "symbol": "REWZUSDT",
+      "ticker": "EWZ",
+      "n": 396,
+      "lighthouse": 11.4,
+      "venue": 28.9,
+      "last_close": 8.4,
+      "vs_lastclose_pct": 36.4,
+      "beat_venue_share": 0.755,
+      "median_realised_bps": 8.4
+    }
+  ]
+}

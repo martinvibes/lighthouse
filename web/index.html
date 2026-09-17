@@ -201,6 +201,20 @@
   </section>
 
   <section>
+    <h2>Where it helps, and where it doesn't</h2>
+    <p class="sub">Median absolute error per name across the whole ledger. The model earns its keep on
+      names with something to explain; on quiet mega-caps it is a rounding error either way, and
+      occasionally a touch worse. Both ends are shown.</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr><th>Instrument</th><th>Rows</th><th>Typical reopen move</th>
+          <th>Assume close held</th><th>Lighthouse</th><th>Change</th></tr></thead>
+        <tbody id="pername"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
     <h2>The record</h2>
     <p class="sub">Walk-forward: at every dark window the model is calibrated only on windows that had
       already closed, then asked to predict the next one. Median absolute error against the 04:00 ET
@@ -219,7 +233,7 @@
 const API="https://api.bitget.com";
 const ET="America/New_York";
 const $=id=>document.getElementById(id);
-let CAL=null, BOARD=[], WIN=null, LAM=[0,0], BAND=NaN;
+let CAL=null, LED=null, BOARD=[], WIN=null, LAM=[0,0], BAND=NaN;
 
 const etParts=d=>{const f=new Intl.DateTimeFormat("en-US",{timeZone:ET,hour12:false,
   year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short"});
@@ -279,6 +293,7 @@ async function pool(items,n,fn){const out=[];let i=0;
 
 async function load(){
   CAL=await (await fetch("calibration.json")).json();
+  try{ LED=await (await fetch("ledger.json")).json(); }catch(e){ LED=null; }
   WIN=darkWindow(new Date());
   const bi=bucketOf(WIN.elapsed);
   LAM=CAL.lambda[String(bi)]||[0,0];
@@ -287,6 +302,7 @@ async function load(){
   drawCurve();
   renderStatus();
   renderRecord();
+  renderPerName();
   renderPresets();
 
   const syms=CAL.universe.slice(0,18);
@@ -411,19 +427,46 @@ function renderBoard(f){
   </tr>`).join("");
 }
 
+function renderPerName(){
+  const tb=$("pername");
+  if(!LED||!LED.per_symbol||!LED.per_symbol.length){
+    tb.innerHTML=`<tr><td colspan="6" style="text-align:center;padding:24px;color:var(--faint)">Ledger not loaded.</td></tr>`;return;}
+  const P=LED.per_symbol, show=[...P.slice(0,8),null,...P.slice(-4)];
+  tb.innerHTML=show.map(d=>{
+    if(!d) return `<tr><td colspan="6" style="text-align:center;color:var(--faint);
+      font-family:'IBM Plex Mono',monospace;font-size:11px;letter-spacing:.1em;padding:9px">
+      ${P.length-12} MORE NAMES IN THE LEDGER</td></tr>`;
+    const better=d.vs_lastclose_pct<0;
+    return `<tr class="stripe ${better?"":"wide"}">
+      <td class="tkr">${d.ticker}<span>${d.symbol}</span></td>
+      <td class="num">${d.n}</td>
+      <td class="num">${d.median_realised_bps.toFixed(0)} bps</td>
+      <td class="num">${d.last_close.toFixed(1)}</td>
+      <td class="num">${d.lighthouse.toFixed(1)}</td>
+      <td class="num ${better?"win":"lose"}">${d.vs_lastclose_pct>0?"+":""}${d.vs_lastclose_pct.toFixed(0)}%</td></tr>`;
+  }).join("");
+}
+
 function renderRecord(){
+  const H=LED&&LED.summary?LED.summary.by_horizon:null;
   const V=CAL.validation, keys=["0.25","0.50","0.75","0.90"], labels={
     "0.25":"22:00 ET","0.50":"00:00 ET","0.75":"02:00 ET","0.90":"03:10 ET"};
-  const cards=keys.filter(k=>V[k]).map(k=>{
-    const m=V[k].models, base=m.last_close.medae, q=m.venue_quote, l=m.lighthouse_cal;
-    const cls=v=>v<0?"win":"lose";
+  const cls=v=>v<0?"win":"lose";
+  const cards=keys.filter(k=>(H&&H[k])||V[k]).map(k=>{
+    const d=H&&H[k];
+    const lh=d?d.lighthouse_medae:V[k].models.lighthouse_cal.medae;
+    const base=d?d.last_close_medae:V[k].models.last_close.medae;
+    const vq=d?d.venue_medae:V[k].models.venue_quote.medae;
+    const pct=d?d.lighthouse_vs_lastclose_pct:V[k].models.lighthouse_cal.vs_baseline_pct;
+    const vpct=(vq/base-1)*100;
+    const n=d?d.n:V[k].models.lighthouse_cal.n;
     return `<div class="stat">
       <div class="k">${labels[k]} · ${Math.round(+k*100)}% into the night</div>
-      <div class="v">${l.medae.toFixed(1)}<span style="font-size:14px;color:var(--faint)"> bps</span></div>
-      <div class="n">Lighthouse <b class="${cls(l.vs_baseline_pct)}">${l.vs_baseline_pct>0?"+":""}${l.vs_baseline_pct.toFixed(0)}%</b>
+      <div class="v">${lh.toFixed(1)}<span style="font-size:14px;color:var(--faint)"> bps</span></div>
+      <div class="n">Lighthouse <b class="${cls(pct)}">${pct>0?"+":""}${pct.toFixed(0)}%</b>
       vs assuming the close held (${base.toFixed(1)} bps).<br>
-      Raw venue quote <b class="${cls(q.vs_baseline_pct)}">${q.vs_baseline_pct>0?"+":""}${q.vs_baseline_pct.toFixed(0)}%</b>
-      (${q.medae.toFixed(1)} bps).</div></div>`;});
+      Raw venue quote <b class="${cls(vpct)}">${vpct>0?"+":""}${vpct.toFixed(0)}%</b> (${vq.toFixed(1)} bps).<br>
+      <span style="color:var(--faint)">${n.toLocaleString()} graded forecasts${d?`, beats the venue on ${Math.round(d.lighthouse_beats_venue_share*100)}%`:""}.</span></div></div>`;});
   const g=CAL.weekend_gap, os=CAL.overshoot["0.75"];
   cards.push(`<div class="stat">
     <div class="k">Weekend repricing</div>
@@ -443,7 +486,11 @@ function renderRecord(){
     treating them as dark inflates every result. Universe is the ${CAL.universe.length} most-traded
     rTokens; span ${CAL.span[0]} to ${CAL.span[1]}. Weekend windows are reported but not yet used for
     fitting — ${CAL.n_windows.weekend} of them is too few, and weekend quoting only became near-continuous
-    in August 2026.`;
+    in August 2026. ${CAL.universe_dropped_stale&&CAL.universe_dropped_stale.length?
+    `${CAL.universe_dropped_stale.length} names were dropped as stale — their price is identical at the
+     close and the reopen, so there is nothing to price.`:""}
+    Every forecast on this page is reproducible from <code>data/ledger.csv</code> in the repo:
+    ${LED?LED.summary.n_rows.toLocaleString():"~21,000"} rows, each written before its own answer was known.`;
 }
 
 const PRESETS=[
@@ -471,7 +518,11 @@ Walk-forward median abs error vs the 04:00 ET reopen:
 ${Object.entries(V).map(([k,v])=>`  ${Math.round(+k*100)}% into window: last-close ${v.models.last_close.medae.toFixed(1)} bps, venue quote ${v.models.venue_quote.medae.toFixed(1)} bps, Lighthouse ${v.models.lighthouse_cal.medae.toFixed(1)} bps`).join("\n")}
 
 BOARD
-${rows}`;
+${rows}
+
+PER-NAME ACCURACY (median abs error, bps, whole ledger)
+${(LED&&LED.per_symbol?LED.per_symbol.slice(0,6).concat(LED.per_symbol.slice(-3)):[]).map(d=>
+  `  ${d.ticker}: lighthouse ${d.lighthouse} vs assume-close-held ${d.last_close} (${d.vs_lastclose_pct>0?"+":""}${d.vs_lastclose_pct}%)`).join("\n")}`;
 }
 
 let sampler=null, asked=false;
