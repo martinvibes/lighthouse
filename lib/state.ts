@@ -1,10 +1,12 @@
 import type { Calibration, Ledger, Row } from "./model";
 import type { DarkWindow } from "./time";
+import type { Earnings } from "@/app/api/events/route";
 
 /** The exact facts the research analyst is allowed to reason from. Nothing else reaches it. */
 export function deskState(
   cal: Calibration | null, led: Ledger | null, win: DarkWindow | null,
-  rows: Row[], lam: [number, number], band: number | null
+  rows: Row[], lam: [number, number], band: number | null,
+  events: Record<string, Earnings> = {}
 ): string {
   if (!cal || !win) return "";
   const g = cal.weekend_gap;
@@ -20,6 +22,7 @@ export function deskState(
       `quote minus fair ${r.devBps.toFixed(0)} bps, ${r.wide ? "OUTSIDE the band" : "inside the band"},`,
       `beta to the tape ${r.beta.toFixed(2)}, 24h turnover $${(r.volume / 1e6).toFixed(1)}M`,
       t ? `| track record over ${t.n} graded forecasts: our error ${t.lighthouse.toFixed(1)} bps, venue ${t.venue.toFixed(1)} bps, close-held ${t.last_close.toFixed(1)} bps, we beat the venue ${(t.beat_venue_share * 100).toFixed(0)}% of the time, typical overnight move ${t.median_realised_bps.toFixed(0)} bps` : "",
+      events[r.ticker] ? `| reports earnings ${events[r.ticker].date} (${events[r.ticker].days} days away)` : "",
       o ? `| this name's quote historically moves ${o.median_quote_move_bps.toFixed(0)} bps for every ${o.median_realised_bps.toFixed(0)} bps that actually sticks (overshoot ${o.ratio.toFixed(2)}x)` : "",
     ].join(" ");
   }).join("\n");
@@ -48,6 +51,10 @@ rTokens are accepted as unified-account collateral at up to 95%, which leaves 5%
 COLLATERAL ARITHMETIC (for questions about margin)
 Collateral = mark x haircut. Liquidation when collateral stops covering the debt. At night the mark is the
 indicative quote, so the room to liquidation the venue shows is computed on a price nobody traded on.
+
+EARNINGS CALENDAR (from Bitget's own agent server, MCP entry equity_calendar_earnings)
+A name quoted far from fair value within a day or two of its report is pricing news, not drifting on a
+stale mark. Say so when it applies rather than calling it a mispricing.
 
 TONIGHT'S BOARD — ${rows.length} names, most drifted first
 ${board}`;

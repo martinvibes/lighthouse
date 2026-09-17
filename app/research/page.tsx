@@ -19,13 +19,13 @@ const SEEDS = [
 ];
 
 export default function Research() {
-  const { cal, led, win, rows, lam, band } = useDesk();
+  const { cal, led, win, rows, lam, band, events } = useDesk();
   const [turns, setTurns] = useState<Turn[]>([]);
   const [q, setQ] = useState("");
   const [busy, setBusy] = useState(false);
   const [showCtx, setShowCtx] = useState(false);
   const end = useRef<HTMLDivElement>(null);
-  const state = useMemo(() => deskState(cal, led, win, rows, lam, band), [cal, led, win, rows, lam, band]);
+  const state = useMemo(() => deskState(cal, led, win, rows, lam, band, events), [cal, led, win, rows, lam, band, events]);
 
   const ask = async (question: string) => {
     if (!question.trim() || busy || !state) return;

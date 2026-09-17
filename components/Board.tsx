@@ -7,7 +7,7 @@ type Key = "ticker" | "quote" | "chg" | "anchor" | "fair" | "dev" | "vol";
 const usd = (v: number) => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
 export default function Board() {
-  const { rows, meta, sel, setSel, band, loading } = useDesk();
+  const { rows, meta, sel, setSel, band, loading, events } = useDesk();
   const [key, setKey] = useState<Key>("dev");
   const [asc, setAsc] = useState(false);
   const [q, setQ] = useState("");
@@ -75,6 +75,11 @@ export default function Board() {
                   <td className="py-2.5 px-3">
                     <span className="font-medium">{r.ticker}</span>
                     <span className="tnum text-[10.5px] text-[var(--color-faint)] ml-2">r{r.ticker}</span>
+                    {events[r.ticker] && events[r.ticker].days <= 2 && (
+                      <span className="label ml-2 rounded px-1.5 py-0.5"
+                            style={{ background: "rgba(214,158,46,0.14)", color: "var(--color-amber)" }}
+                            title={`Reports earnings ${events[r.ticker].date}`}>earnings</span>
+                    )}
                   </td>
                   <td className="tnum py-2.5 px-3 text-right">{usd(r.quote)}</td>
                   <td className="tnum py-2.5 px-3 text-right" style={{ color: "var(--color-mint)" }}>{usd(r.fair)}</td>

@@ -6,11 +6,13 @@ const usd = (v: number) => v.toLocaleString("en-US", { minimumFractionDigits: 2,
 
 /** One name, one judgement. Three numbers and a sentence. */
 export default function Verdict() {
-  const { rows, sel, band, led } = useDesk();
+  const { rows, sel, band, led, events } = useDesk();
   const row = useMemo(() => rows.find((r) => r.symbol === sel) ?? null, [rows, sel]);
   const track = led?.per_symbol.find((p) => p.symbol === sel);
   if (!row || band === null) return <div className="glass h-full min-h-[200px]" />;
 
+  const ev = events[row.ticker];
+  const imminent = ev && ev.days <= 2;
   const wide = row.wide;
   const c = wide ? "var(--color-danger)" : "var(--color-mint)";
   const ratio = Math.min(1, Math.abs(row.devBps) / Math.max(band, 1));
@@ -25,6 +27,16 @@ export default function Verdict() {
             : `Quote is within the ±${band} bps we normally miss by.`}
         </p>
       </div>
+
+      {imminent && (
+        <div className="mx-5 mb-4 rounded-xl px-3.5 py-3 hairline"
+             style={{ background: "rgba(214,158,46,0.08)", borderColor: "rgba(214,158,46,0.28)" }}>
+          <p className="text-[12.5px] leading-relaxed" style={{ color: "var(--color-amber)" }}>
+            {row.ticker} reports {ev!.days <= 0 ? "today" : ev!.days === 1 ? "tomorrow" : `in ${ev!.days} days`}.
+            A gap this size before a report is news arriving, not a stale mark — read it as real, not as a mirage.
+          </p>
+        </div>
+      )}
 
       <div className="px-5 pb-4">
         <div className="flex justify-between items-baseline mb-1.5">
@@ -43,6 +55,14 @@ export default function Verdict() {
         <Box k="20:00 close" v={usd(row.anchor)} />
         <Box k="fair value" v={usd(row.fair)} c="var(--color-mint)" left />
       </div>
+
+      {ev && !imminent && (
+        <div className="px-5 py-2.5 border-t border-[var(--color-line)]">
+          <span className="label">next earnings</span>
+          <span className="tnum text-[12.5px] ml-2">{ev.date}</span>
+          <span className="label ml-2">{ev.days} days out</span>
+        </div>
+      )}
 
       {track && (
         <div className="px-5 py-3.5 border-t border-[var(--color-line)] mt-auto">

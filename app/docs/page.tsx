@@ -256,6 +256,14 @@ export default function Docs() {
               note="all four published at the links in the sidebar"
             />
             <P>
+              One thing does not come from the price endpoints: the earnings calendar. That is read live from
+              Bitget&apos;s own agent server at <Code>agent.bitget.com/mcp</Code> over MCP — keyless, with the tool
+              catalogue discovered at runtime rather than hardcoded, so the desk keeps working if the catalogue
+              moves and simply says the calendar is unavailable if the server does not answer. It matters
+              because a quote sitting far from fair value the night before a report is news arriving, not a
+              stale mark, and the desk should not call those the same thing.
+            </P>
+            <P>
               The Python side fetches, builds windows, fits and grades. The web side re-implements only the
               forward pass — market factor, shrinkage, band — so the browser can price the live board without a
               server. The numbers on this site are produced by the same arithmetic that produced the ledger.

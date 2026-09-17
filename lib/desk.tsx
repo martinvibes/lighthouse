@@ -4,6 +4,7 @@ import { candles, pool, tickers, type Candle } from "@/lib/bitget";
 import { anchorClose, priceBoard, type Calibration, type Ledger, type Row } from "@/lib/model";
 import { darkWindow, type DarkWindow } from "@/lib/time";
 import { horizonKey, type Tails } from "@/lib/risk";
+import type { Earnings } from "@/app/api/events/route";
 
 type Desk = {
   cal: Calibration | null;
@@ -19,6 +20,9 @@ type Desk = {
   sel: string | null;
   setSel: (s: string) => void;
   candles: Candle[];
+  /** Next earnings date per plain ticker, from Bitget's agent server. */
+  events: Record<string, Earnings>;
+  eventsNote: string | null;
   updated: Date | null;
   err: string | null;
   loading: boolean;
@@ -46,6 +50,8 @@ export function DeskProvider({ children }: { children: React.ReactNode }) {
   const [updated, setUpdated] = useState<Date | null>(null);
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [events, setEvents] = useState<Record<string, Earnings>>({});
+  const [eventsNote, setEventsNote] = useState<string | null>(null);
   const seeded = useRef(false);
 
   useEffect(() => {
@@ -54,6 +60,15 @@ export function DeskProvider({ children }: { children: React.ReactNode }) {
       fetch("/ledger.json").then((r) => r.json()).catch(() => null),
       fetch("/tails.json").then((r) => r.json()).catch(() => null),
     ]).then(([c, l, t]) => { setCal(c); setLed(l); setTails(t); });
+
+    // The earnings calendar changes by the day, not the second: fetch once.
+    fetch("/api/events")
+      .then((r) => r.json())
+      .then((e) => {
+        if (e?.ok) setEvents(e.calendar ?? {});
+        else setEventsNote(e?.reason ?? "The calendar is unavailable.");
+      })
+      .catch(() => setEventsNote("The calendar is unavailable."));
   }, []);
 
   const refresh = useCallback(async (c: Calibration) => {
@@ -116,8 +131,8 @@ export function DeskProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<Desk>(() => ({
     cal, led, tails, win, rows, meta, factor, lam, band,
     horizon: horizonKey(win?.elapsed ?? 0.5),
-    sel, setSel, candles: cs, updated, err, loading,
-  }), [cal, led, tails, win, rows, meta, factor, lam, band, sel, cs, updated, err, loading]);
+    sel, setSel, candles: cs, events, eventsNote, updated, err, loading,
+  }), [cal, led, tails, win, rows, meta, factor, lam, band, sel, cs, events, eventsNote, updated, err, loading]);
 
   return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
 }

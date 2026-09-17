@@ -4,7 +4,6 @@ import { usePathname } from "next/navigation";
 import { motion } from "framer-motion";
 import Logo from "./Logo";
 import { useDesk } from "@/lib/desk";
-import ThemeToggle from "./ThemeToggle";
 
 const LINKS = [
   { href: "/", label: "Overview" },
@@ -87,7 +86,6 @@ export default function Nav() {
           >
             GitHub ↗
           </a>
-          <ThemeToggle />
           <Link
             href="/desk"
             className="rounded-full px-4 py-1.5 text-[13px] font-semibold transition-transform hover:scale-[1.03] active:scale-95"
