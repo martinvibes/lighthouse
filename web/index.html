@@ -1,0 +1,511 @@
+<title>Lighthouse Dark-Hours Desk</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:ital,opsz,wght@0,6..72,400;0,6..72,500;1,6..72,400&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+  :root{
+    --ground:#EEF1F4; --panel:#FFFFFF; --sunk:#E4E9EE;
+    --line:#CBD4DD; --hair:#DCE3EA;
+    --text:#161D28; --muted:#5A6878; --faint:#8593A3;
+    --lamp:#B96D12; --lamp-soft:#F3E2CB;
+    --sea:#2F706B; --sea-soft:#D7E7E4;
+    --clay:#A63E2C; --clay-soft:#F4DCD6;
+    --shadow:0 1px 2px rgba(22,29,40,.06),0 8px 24px -12px rgba(22,29,40,.18);
+  }
+  @media (prefers-color-scheme:dark){
+    :root:not([data-theme="light"]){
+      --ground:#0E1420; --panel:#151D2B; --sunk:#111827;
+      --line:#2A3648; --hair:#212C3C;
+      --text:#E6EBF2; --muted:#93A2B5; --faint:#6B7B90;
+      --lamp:#E8963C; --lamp-soft:#3A2A16;
+      --sea:#5FB3AB; --sea-soft:#14302E;
+      --clay:#DD7159; --clay-soft:#37201B;
+      --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.7);
+    }
+  }
+  :root[data-theme="dark"]{
+    --ground:#0E1420; --panel:#151D2B; --sunk:#111827;
+    --line:#2A3648; --hair:#212C3C;
+    --text:#E6EBF2; --muted:#93A2B5; --faint:#6B7B90;
+    --lamp:#E8963C; --lamp-soft:#3A2A16;
+    --sea:#5FB3AB; --sea-soft:#14302E;
+    --clay:#DD7159; --clay-soft:#37201B;
+    --shadow:0 1px 2px rgba(0,0,0,.3),0 10px 30px -14px rgba(0,0,0,.7);
+  }
+  *{box-sizing:border-box}
+  body{background:var(--ground);color:var(--text);
+    font-family:"IBM Plex Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    font-size:15px;line-height:1.55;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1080px;margin:0 auto;padding:40px 22px 72px;display:flex;flex-direction:column;gap:34px}
+  h1,h2,h3{margin:0;text-wrap:balance}
+  .mono{font-family:"IBM Plex Mono",ui-monospace,Menlo,monospace;font-variant-numeric:tabular-nums}
+  .eyebrow{font-family:"IBM Plex Mono",monospace;font-size:11px;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--faint)}
+
+  /* masthead */
+  .mast{display:flex;flex-direction:column;gap:14px}
+  .lamp-mark{display:flex;align-items:baseline;gap:13px;flex-wrap:wrap}
+  .lamp-mark h1{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:clamp(34px,5vw,52px);
+    line-height:1.02;letter-spacing:-.015em}
+  .beam{width:34px;height:34px;flex:none;align-self:center}
+  .thesis{max-width:62ch;color:var(--muted);font-size:16px}
+  .thesis b{color:var(--text);font-weight:500}
+  .statusbar{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .chip{display:inline-flex;align-items:center;gap:7px;padding:5px 11px;border-radius:999px;
+    border:1px solid var(--line);background:var(--panel);font-size:12.5px;color:var(--muted)}
+  .chip .dot{width:7px;height:7px;border-radius:50%;background:var(--faint)}
+  .chip.live{border-color:var(--lamp);color:var(--lamp);background:var(--lamp-soft)}
+  .chip.live .dot{background:var(--lamp);animation:pulse 2.4s ease-in-out infinite}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  @media (prefers-reduced-motion:reduce){.chip.live .dot{animation:none}}
+
+  /* night band */
+  .band{background:var(--panel);border:1px solid var(--hair);border-radius:14px;
+    padding:26px 26px 18px;box-shadow:var(--shadow)}
+  .band-head{display:flex;justify-content:space-between;gap:20px;flex-wrap:wrap;
+    align-items:flex-start;margin-bottom:6px}
+  .band-head h2{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:25px}
+  .band-head p{margin:5px 0 0;color:var(--muted);font-size:14px;max-width:54ch}
+  .trust-now{text-align:right;flex:none}
+  .trust-now .big{font-family:"IBM Plex Mono",monospace;font-size:38px;font-weight:500;
+    line-height:1;color:var(--lamp);font-variant-numeric:tabular-nums}
+  .trust-now .cap{font-size:12px;color:var(--faint);margin-top:4px}
+  .chartbox{overflow-x:auto;margin-top:12px}
+  svg{display:block}
+
+  /* board */
+  section>h2{font-family:Newsreader,Georgia,serif;font-weight:400;font-size:25px;margin-bottom:3px}
+  section>.sub{color:var(--muted);font-size:14px;margin:0 0 15px;max-width:66ch}
+  .tablewrap{overflow-x:auto;border:1px solid var(--hair);border-radius:12px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;min-width:720px}
+  th{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--faint);text-align:right;padding:12px 14px;border-bottom:1px solid var(--line);font-weight:500;
+    white-space:nowrap}
+  th:first-child,td:first-child{text-align:left}
+  td{padding:11px 14px;border-bottom:1px solid var(--hair);text-align:right;font-size:14px;white-space:nowrap}
+  tr:last-child td{border-bottom:none}
+  .tkr{font-weight:600;letter-spacing:-.01em}
+  .tkr span{color:var(--faint);font-weight:400;margin-left:7px;font-size:12.5px}
+  .num{font-family:"IBM Plex Mono",monospace;font-variant-numeric:tabular-nums}
+  .flag{display:inline-block;padding:2px 8px;border-radius:5px;font-size:11.5px;font-weight:500;
+    font-family:"IBM Plex Mono",monospace}
+  .flag.ok{background:var(--sea-soft);color:var(--sea)}
+  .flag.wide{background:var(--clay-soft);color:var(--clay)}
+  .stripe{border-left:3px solid transparent}
+  .stripe.wide{border-left-color:var(--clay)}
+
+  /* ask */
+  .ask{background:var(--panel);border:1px solid var(--hair);border-radius:14px;padding:24px;
+    box-shadow:var(--shadow);display:flex;flex-direction:column;gap:14px}
+  .qrow{display:flex;gap:9px;flex-wrap:wrap}
+  .qbtn{border:1px solid var(--line);background:var(--sunk);color:var(--text);cursor:pointer;
+    border-radius:8px;padding:8px 12px;font:inherit;font-size:13px;text-align:left;transition:border-color .15s}
+  .qbtn:hover{border-color:var(--lamp)}
+  .qbtn:focus-visible{outline:2px solid var(--lamp);outline-offset:2px}
+  .askform{display:flex;gap:9px;flex-wrap:wrap}
+  .askform input{flex:1 1 280px;padding:10px 13px;border-radius:9px;border:1px solid var(--line);
+    background:var(--ground);color:var(--text);font:inherit;font-size:14px}
+  .askform input:focus-visible{outline:2px solid var(--lamp);outline-offset:1px}
+  .askform button{padding:10px 20px;border-radius:9px;border:1px solid var(--lamp);background:var(--lamp);
+    color:var(--ground);font:inherit;font-weight:600;font-size:14px;cursor:pointer}
+  .askform button:disabled{opacity:.5;cursor:default}
+  .answer{background:var(--sunk);border:1px solid var(--hair);border-radius:10px;padding:16px 18px;
+    font-size:14.5px;line-height:1.62;white-space:pre-wrap}
+  .answer:empty{display:none}
+
+  /* record */
+  .grid2{display:grid;gap:16px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+  .stat{background:var(--panel);border:1px solid var(--hair);border-radius:12px;padding:17px 18px}
+  .stat .k{font-family:"IBM Plex Mono",monospace;font-size:10.5px;letter-spacing:.1em;
+    text-transform:uppercase;color:var(--faint)}
+  .stat .v{font-family:"IBM Plex Mono",monospace;font-size:27px;font-weight:500;margin:7px 0 3px;
+    font-variant-numeric:tabular-nums}
+  .stat .n{font-size:13px;color:var(--muted);line-height:1.45}
+  .win{color:var(--sea)} .lose{color:var(--clay)}
+  .note{font-size:13.5px;color:var(--muted);max-width:70ch}
+  .note code{font-family:"IBM Plex Mono",monospace;font-size:12.5px;background:var(--sunk);
+    padding:1px 5px;border-radius:4px}
+  footer{border-top:1px solid var(--hair);padding-top:20px;color:var(--faint);font-size:13px;
+    display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+  a{color:var(--lamp)}
+</style>
+
+<div class="wrap">
+  <header class="mast">
+    <div class="lamp-mark">
+      <svg class="beam" viewBox="0 0 34 34" aria-hidden="true">
+        <path d="M17 4 L17 30" stroke="var(--line)" stroke-width="1"/>
+        <circle cx="17" cy="11" r="5" fill="var(--lamp)"/>
+        <path d="M17 11 L33 3 L33 19 Z" fill="var(--lamp)" opacity=".2"/>
+        <path d="M17 11 L1 3 L1 19 Z" fill="var(--lamp)" opacity=".2"/>
+        <path d="M11 30 L23 30 L21 22 L13 22 Z" fill="none" stroke="var(--text)" stroke-width="1.4"/>
+      </svg>
+      <h1>Lighthouse</h1>
+      <span class="eyebrow">Dark-hours desk</span>
+    </div>
+    <p class="thesis">Tokenized US equities keep quoting after NYSE and Nasdaq go dark. Bitget says
+      plainly that those quotes are <b>indicative, not transaction prices</b>. This desk measures how
+      much of tonight's quote will still be true at the reopen — and marks the names where it won't.</p>
+    <div class="statusbar" id="statusbar">
+      <span class="chip"><span class="dot"></span>Connecting to Bitget…</span>
+    </div>
+  </header>
+
+  <div class="band">
+    <div class="band-head">
+      <div>
+        <h2>The night, and how much of it to believe</h2>
+        <p>US venues of every kind — regular session and extended hours — are shut from 20:00 to 04:00 ET.
+          Shrinkage below is fitted on closed windows only, walk-forward.</p>
+      </div>
+      <div class="trust-now">
+        <div class="big mono" id="lamNow">—</div>
+        <div class="cap" id="lamCap">of the quote survives</div>
+      </div>
+    </div>
+    <div class="chartbox"><svg id="curve" viewBox="0 0 980 250" width="980" height="250" role="img"
+      aria-label="Trust in the venue quote rising across the dark window"></svg></div>
+  </div>
+
+  <section>
+    <h2 id="boardTitle">The board</h2>
+    <p class="sub" id="boardSub">Loading live quotes…</p>
+    <div class="tablewrap">
+      <table>
+        <thead><tr>
+          <th>Instrument</th><th>Last session close</th><th>Venue quote</th>
+          <th>Quote move</th><th>Lighthouse fair value</th><th>Quote − fair</th><th>Verdict</th>
+        </tr></thead>
+        <tbody id="board"><tr><td colspan="7" style="text-align:center;color:var(--faint);padding:28px">
+          Fetching the universe…</td></tr></tbody>
+      </table>
+    </div>
+    <p class="note" style="margin-top:12px">Fair value = last regular-session close, plus the part of the
+      quote's move that history says survives to the reopen. <b>Quote − fair</b> is what the venue is
+      showing you that the record does not support. A verdict of <span class="flag wide">outside band</span>
+      means the gap exceeds the calibrated error for this hour of the night.</p>
+  </section>
+
+  <section class="ask">
+    <div>
+      <h2 style="font-family:Newsreader,Georgia,serif;font-weight:400;font-size:25px">Ask the desk</h2>
+      <p class="sub" style="margin-bottom:0">Questions are answered against the live board and the
+        measured record below — not from memory.</p>
+    </div>
+    <div class="qrow" id="presets"></div>
+    <form class="askform" id="askform">
+      <input id="q" type="text" placeholder="e.g. I'm holding rNVDA through the weekend — what's my gap exposure?" autocomplete="off">
+      <button type="submit" id="askbtn">Ask</button>
+    </form>
+    <div class="answer" id="answer"></div>
+  </section>
+
+  <section>
+    <h2>The record</h2>
+    <p class="sub">Walk-forward: at every dark window the model is calibrated only on windows that had
+      already closed, then asked to predict the next one. Median absolute error against the 04:00 ET
+      reopen, in basis points. Lower is better.</p>
+    <div class="grid2" id="record"></div>
+    <p class="note" style="margin-top:16px" id="methodnote"></p>
+  </section>
+
+  <footer>
+    <span>Lighthouse · Bitget AI Base Camp Hackathon S2 · AI Trading Desk</span>
+    <span><a href="https://github.com/martinvibes/lighthouse">github.com/martinvibes/lighthouse</a></span>
+  </footer>
+</div>
+
+<script>
+const API="https://api.bitget.com";
+const ET="America/New_York";
+const $=id=>document.getElementById(id);
+let CAL=null, BOARD=[], WIN=null, LAM=[0,0], BAND=NaN;
+
+const etParts=d=>{const f=new Intl.DateTimeFormat("en-US",{timeZone:ET,hour12:false,
+  year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",weekday:"short"});
+  const o={};for(const p of f.formatToParts(d))o[p.type]=p.value;
+  return{y:+o.year,m:+o.month,d:+o.day,h:+o.hour%24,mi:+o.minute,wd:o.weekday};};
+const etHour=d=>etParts(d).h;
+const median=a=>{if(!a.length)return 0;const s=[...a].sort((x,y)=>x-y);const m=s.length>>1;
+  return s.length%2?s[m]:(s[m-1]+s[m])/2;};
+const bps=v=>(v*1e4);
+const fmtBps=v=>(v>=0?"+":"")+v.toFixed(0)+" bps";
+const fmtUsd=v=>v>=1000?v.toFixed(0):v.toFixed(2);
+
+// Anchor the dark window on the 20:00 ET close and the 04:00 ET reopen.
+// US venues of every kind are shut between those two marks; everything either
+// side is a regular or extended-hours session and is NOT dark.
+function etInstant(y,m,d,h){
+  let t=Date.UTC(y,m-1,d,h);
+  for(let i=0;i<4;i++){
+    const p=etParts(new Date(t));
+    t+=Date.UTC(y,m-1,d,h,0)-Date.UTC(p.y,p.m-1,p.d,p.h,p.mi);
+  }
+  return new Date(t);
+}
+const WD=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+function shiftDays(p,n){
+  const t=new Date(Date.UTC(p.y,p.m-1,p.d)+n*864e5);
+  return {y:t.getUTCFullYear(),m:t.getUTCMonth()+1,d:t.getUTCDate(),wd:WD[t.getUTCDay()]};
+}
+function darkWindow(now){
+  const p=etParts(now);
+  // The session day whose 20:00 ET opened the most recent dark window.
+  let day={y:p.y,m:p.m,d:p.d,wd:p.wd};
+  if(p.h<20) day=shiftDays(day,-1);
+  while(day.wd==="Sat"||day.wd==="Sun") day=shiftDays(day,-1);
+  const start=etInstant(day.y,day.m,day.d,20);
+  const weekend=day.wd==="Fri";
+  const endDay=shiftDays(day,weekend?3:1);
+  const end=etInstant(endDay.y,endDay.m,endDay.d,4);
+  const active=now>=start&&now<=end;
+  const asOf=active?now:end;
+  return {start,end,active,kind:weekend?"weekend":"overnight",asOf,
+          elapsed:Math.max(0,Math.min(1,(asOf-start)/(end-start)))};
+}
+
+function bucketOf(el){
+  const E=CAL.edges;
+  for(let i=0;i<E.length-1;i++) if(el>=E[i]&&el<E[i+1]) return i;
+  return E.length-2;
+}
+
+async function j(url){const r=await fetch(url);if(!r.ok)throw new Error(r.status);
+  const d=await r.json();if(d.code!=="00000")throw new Error(d.msg);return d.data;}
+
+async function pool(items,n,fn){const out=[];let i=0;
+  await Promise.all(Array.from({length:n},async()=>{while(i<items.length){const k=i++;
+    try{out[k]=await fn(items[k]);}catch(e){out[k]=null;}}}));return out;}
+
+async function load(){
+  CAL=await (await fetch("calibration.json")).json();
+  WIN=darkWindow(new Date());
+  const bi=bucketOf(WIN.elapsed);
+  LAM=CAL.lambda[String(bi)]||[0,0];
+  BAND=CAL.band_bps[String(bi)];
+
+  drawCurve();
+  renderStatus();
+  renderRecord();
+  renderPresets();
+
+  const syms=CAL.universe.slice(0,18);
+  const tick=await j(`${API}/api/v2/spot/market/tickers`);
+  const px={}; for(const t of tick) px[t.symbol]=parseFloat(t.lastPr);
+
+  const rows=await pool(syms,6,async sym=>{
+    const c=await j(`${API}/api/v2/spot/market/candles?symbol=${sym}&granularity=1h&limit=60`);
+    // last bar opening at 19:00 ET at or before the window start -> its close is the 20:00 ET price
+    let anchor=null;
+    for(const r of c){const t=new Date(+r[0]);
+      if(t<=WIN.start && etHour(t)===19) anchor={t,close:parseFloat(r[4])};}
+    if(!anchor) return null;
+    let quote=px[sym];
+    if(!WIN.active){ // replay the close of the window
+      let last=null;
+      for(const r of c){const t=new Date(+r[0]); if(t<=WIN.end) last=parseFloat(r[4]);}
+      quote=last??quote;
+    }
+    if(!quote||!anchor.close) return null;
+    return {sym,ticker:sym.replace(/^R/,"").replace(/USDT$/,""),
+            anchor:anchor.close,quote,r:quote/anchor.close-1};
+  });
+
+  BOARD=rows.filter(Boolean);
+  const f=median(BOARD.map(x=>x.r));
+  for(const row of BOARD){
+    const beta=CAL.beta[row.sym]??1;
+    const common=beta*f, idio=row.r-common;
+    row.fvRet=LAM[0]*common+LAM[1]*idio;
+    row.fair=row.anchor*(1+row.fvRet);
+    row.devBps=bps((row.quote-row.fair)/row.fair);
+    row.wide=Math.abs(row.devBps)>(BAND||1e9);
+  }
+  BOARD.sort((a,b)=>Math.abs(b.devBps)-Math.abs(a.devBps));
+  renderBoard(f);
+}
+
+function renderStatus(){
+  const f=new Intl.DateTimeFormat("en-US",{timeZone:ET,hour:"2-digit",minute:"2-digit",
+    hour12:false,weekday:"short"});
+  const chips=[];
+  if(WIN.active){
+    const left=Math.max(0,WIN.end-WIN.asOf)/3600e3;
+    chips.push(`<span class="chip live"><span class="dot"></span>Market dark · ${left.toFixed(1)}h to reopen</span>`);
+  }else{
+    chips.push(`<span class="chip"><span class="dot"></span>US venues open — replaying the last dark window</span>`);
+  }
+  chips.push(`<span class="chip">${WIN.kind==="weekend"?"Weekend window":"Overnight window"} · ${f.format(WIN.start)} → ${f.format(WIN.end)} ET</span>`);
+  chips.push(`<span class="chip">Calibrated on ${CAL.n_windows.overnight} overnight + ${CAL.n_windows.weekend} weekend windows</span>`);
+  $("statusbar").innerHTML=chips.join("");
+  $("lamNow").textContent=Math.round(LAM[0]*100)+"%";
+  $("lamCap").innerHTML=`of the common move survives<br>± ${BAND?BAND.toFixed(0):"—"} bps typical error`;
+}
+
+function drawCurve(){
+  const svg=$("curve"),W=980,H=250,L=62,R=22,T=26,B=42;
+  const x=v=>L+v*(W-L-R), y=v=>H-B-v*(H-T-B);
+  const E=CAL.edges, parts=[];
+  parts.push(`<rect x="${L}" y="${T}" width="${W-L-R}" height="${H-T-B}" fill="var(--sunk)" rx="6"/>`);
+  for(let g=0;g<=4;g++){const v=g/4;
+    parts.push(`<line x1="${L}" y1="${y(v)}" x2="${W-R}" y2="${y(v)}" stroke="var(--hair)" stroke-width="1"/>`);
+    parts.push(`<text x="${L-10}" y="${y(v)+4}" text-anchor="end" font-size="11" fill="var(--faint)"
+      font-family="IBM Plex Mono, monospace">${Math.round(v*100)}%</text>`);}
+  // step curve of lambda_common
+  let d="";
+  for(let i=0;i<E.length-1;i++){
+    const lam=(CAL.lambda[String(i)]||[0,0])[0];
+    const x0=x(E[i]),x1=x(Math.min(E[i+1],1));
+    d+=`${d?"L":"M"}${x0.toFixed(1)},${y(lam).toFixed(1)} L${x1.toFixed(1)},${y(lam).toFixed(1)} `;
+    parts.push(`<rect x="${x0}" y="${y(lam)}" width="${x1-x0}" height="${H-B-y(lam)}"
+      fill="var(--lamp)" opacity=".13"/>`);
+    parts.push(`<text x="${(x0+x1)/2}" y="${y(lam)-9}" text-anchor="middle" font-size="12"
+      font-family="IBM Plex Mono, monospace" fill="var(--lamp)">${lam.toFixed(2)}</text>`);
+  }
+  parts.push(`<path d="${d}" fill="none" stroke="var(--lamp)" stroke-width="2.5"
+    stroke-linejoin="round"/>`);
+  // hour ticks across the window
+  const hrs=(WIN.end-WIN.start)/3600e3;
+  const fmt=new Intl.DateTimeFormat("en-US",{timeZone:ET,hour:"2-digit",hour12:false});
+  const steps=WIN.kind==="weekend"?6:4;
+  for(let i=0;i<=steps;i++){const frac=i/steps;
+    const t=new Date(+WIN.start+frac*hrs*3600e3);
+    parts.push(`<line x1="${x(frac)}" y1="${H-B}" x2="${x(frac)}" y2="${H-B+5}" stroke="var(--line)"/>`);
+    parts.push(`<text x="${x(frac)}" y="${H-B+20}" text-anchor="middle" font-size="11"
+      font-family="IBM Plex Mono, monospace" fill="var(--faint)">${fmt.format(t)}:00</text>`);}
+  parts.push(`<text x="${L}" y="${H-8}" font-size="11" fill="var(--faint)"
+    font-family="IBM Plex Mono, monospace">US CLOSE</text>`);
+  parts.push(`<text x="${W-R}" y="${H-8}" text-anchor="end" font-size="11" fill="var(--faint)"
+    font-family="IBM Plex Mono, monospace">PRE-MARKET REOPEN</text>`);
+  // now marker
+  const nx=x(WIN.elapsed);
+  parts.push(`<line x1="${nx}" y1="${T}" x2="${nx}" y2="${H-B}" stroke="var(--sea)"
+    stroke-width="2" stroke-dasharray="4 3"/>`);
+  parts.push(`<circle cx="${nx}" cy="${T}" r="4" fill="var(--sea)"/>`);
+  const anchorEnd=WIN.elapsed>0.82;
+  parts.push(`<text x="${anchorEnd?nx-9:nx+9}" y="${T+14}" text-anchor="${anchorEnd?"end":"start"}"
+    font-size="11.5" font-family="IBM Plex Mono, monospace" fill="var(--sea)">${WIN.active?"NOW":"WINDOW CLOSE"}</text>`);
+  parts.push(`<text x="${L}" y="${T-10}" font-size="11" fill="var(--faint)"
+    font-family="IBM Plex Mono, monospace">SHARE OF THE QUOTE'S MOVE THAT SURVIVES TO THE REOPEN</text>`);
+  svg.innerHTML=parts.join("");
+}
+
+function renderBoard(f){
+  const tb=$("board");
+  if(!BOARD.length){tb.innerHTML=`<tr><td colspan="7" style="text-align:center;padding:28px;color:var(--faint)">
+    No quotes available for this window.</td></tr>`;return;}
+  const wide=BOARD.filter(r=>r.wide).length;
+  $("boardTitle").textContent=WIN.active?"The board, live":"The board, last dark window";
+  $("boardSub").innerHTML=`${BOARD.length} of the most-traded rTokens. Cross-sectional factor for this
+    window is <b class="mono">${fmtBps(bps(f))}</b>; shrinkage in force is
+    <b class="mono">${LAM[0].toFixed(2)}</b> on the common move and <b class="mono">${LAM[1].toFixed(2)}</b>
+    on the name-specific part. ${wide?`<b>${wide}</b> name${wide>1?"s are":" is"} quoting outside the calibrated band.`:"Every name is inside its band."}`;
+  tb.innerHTML=BOARD.map(r=>`<tr class="stripe ${r.wide?"wide":""}">
+    <td class="tkr">${r.ticker}<span>${r.sym}</span></td>
+    <td class="num">${fmtUsd(r.anchor)}</td>
+    <td class="num">${fmtUsd(r.quote)}</td>
+    <td class="num" style="color:${r.r>=0?"var(--sea)":"var(--clay)"}">${fmtBps(bps(r.r))}</td>
+    <td class="num">${fmtUsd(r.fair)}</td>
+    <td class="num">${fmtBps(r.devBps)}</td>
+    <td><span class="flag ${r.wide?"wide":"ok"}">${r.wide?"outside band":"inside band"}</span></td>
+  </tr>`).join("");
+}
+
+function renderRecord(){
+  const V=CAL.validation, keys=["0.25","0.50","0.75","0.90"], labels={
+    "0.25":"22:00 ET","0.50":"00:00 ET","0.75":"02:00 ET","0.90":"03:10 ET"};
+  const cards=keys.filter(k=>V[k]).map(k=>{
+    const m=V[k].models, base=m.last_close.medae, q=m.venue_quote, l=m.lighthouse_cal;
+    const cls=v=>v<0?"win":"lose";
+    return `<div class="stat">
+      <div class="k">${labels[k]} · ${Math.round(+k*100)}% into the night</div>
+      <div class="v">${l.medae.toFixed(1)}<span style="font-size:14px;color:var(--faint)"> bps</span></div>
+      <div class="n">Lighthouse <b class="${cls(l.vs_baseline_pct)}">${l.vs_baseline_pct>0?"+":""}${l.vs_baseline_pct.toFixed(0)}%</b>
+      vs assuming the close held (${base.toFixed(1)} bps).<br>
+      Raw venue quote <b class="${cls(q.vs_baseline_pct)}">${q.vs_baseline_pct>0?"+":""}${q.vs_baseline_pct.toFixed(0)}%</b>
+      (${q.medae.toFixed(1)} bps).</div></div>`;});
+  const g=CAL.weekend_gap, os=CAL.overshoot["0.75"];
+  cards.push(`<div class="stat">
+    <div class="k">Weekend repricing</div>
+    <div class="v">${g.median_bps.toFixed(0)}<span style="font-size:14px;color:var(--faint)"> bps</span></div>
+    <div class="n">Median move from Friday's close to Monday's reopen across ${g.n} name-weekends.
+      90th percentile ${g.p90_bps.toFixed(0)} bps; <b>${(g.share_over_200bps*100).toFixed(0)}%</b>
+      exceed 200 bps. rTokens are accepted as collateral at ratios up to 95%.</div></div>`);
+  cards.push(`<div class="stat">
+    <div class="k">Quote overshoot at 02:00 ET</div>
+    <div class="v">${os.ratio.toFixed(2)}<span style="font-size:14px;color:var(--faint)">×</span></div>
+    <div class="n">The venue quote moves ${os.median_quote_move_bps.toFixed(0)} bps while the repricing
+      that actually sticks is ${os.median_realised_bps.toFixed(0)} bps. Most of what you see at 2am
+      is walked back by the open.</div></div>`);
+  $("record").innerHTML=cards.join("");
+  $("methodnote").innerHTML=`Ground truth is the 04:00 ET pre-market reopen. The dark window is
+    <code>20:00 → 04:00 ET</code>, not 16:00 → 09:30: US extended-hours sessions cover the rest, and
+    treating them as dark inflates every result. Universe is the ${CAL.universe.length} most-traded
+    rTokens; span ${CAL.span[0]} to ${CAL.span[1]}. Weekend windows are reported but not yet used for
+    fitting — ${CAL.n_windows.weekend} of them is too few, and weekend quoting only became near-continuous
+    in August 2026.`;
+}
+
+const PRESETS=[
+  "I'm holding rNVDA through the weekend — what's my gap exposure?",
+  "Which name on the board is the venue mispricing most right now?",
+  "Should I trust the quote at this hour, or wait for the reopen?"
+];
+function renderPresets(){
+  $("presets").innerHTML=PRESETS.map(p=>`<button class="qbtn" type="button">${p}</button>`).join("");
+  $("presets").querySelectorAll("button").forEach(b=>b.onclick=()=>{$("q").value=b.textContent;ask();});
+}
+
+function briefing(){
+  const rows=BOARD.slice(0,12).map(r=>
+    `${r.ticker}: close ${fmtUsd(r.anchor)}, venue quote ${fmtUsd(r.quote)} (${fmtBps(bps(r.r))}), `+
+    `Lighthouse fair value ${fmtUsd(r.fair)}, quote minus fair ${fmtBps(r.devBps)}, `+
+    `${r.wide?"OUTSIDE":"inside"} the band`).join("\n");
+  const V=CAL.validation, g=CAL.weekend_gap;
+  return `DESK STATE (all figures measured, do not invent others)
+Window: ${WIN.kind}, ${WIN.active?"currently dark":"closed, replaying"}, ${(WIN.elapsed*100).toFixed(0)}% elapsed.
+Shrinkage in force: ${LAM[0].toFixed(2)} on the common move, ${LAM[1].toFixed(2)} on the name-specific move.
+Calibrated typical error at this hour: ${BAND?BAND.toFixed(0):"n/a"} bps.
+Weekend repricing: median ${g.median_bps.toFixed(0)} bps, p90 ${g.p90_bps.toFixed(0)} bps, ${(g.share_over_200bps*100).toFixed(0)}% exceed 200 bps.
+Walk-forward median abs error vs the 04:00 ET reopen:
+${Object.entries(V).map(([k,v])=>`  ${Math.round(+k*100)}% into window: last-close ${v.models.last_close.medae.toFixed(1)} bps, venue quote ${v.models.venue_quote.medae.toFixed(1)} bps, Lighthouse ${v.models.lighthouse_cal.medae.toFixed(1)} bps`).join("\n")}
+
+BOARD
+${rows}`;
+}
+
+let sampler=null, asked=false;
+async function ask(){
+  const q=$("q").value.trim(); if(!q) return;
+  const out=$("answer"), btn=$("askbtn");
+  if(sampler===null) sampler=await window.claude?.use?.("sample")??null;
+  if(!sampler){out.textContent="The research assistant isn't available in this view. The board and the measured record above are unaffected.";return;}
+  btn.disabled=true; out.textContent="Reading the board…";
+  try{
+    const res=await sampler([{role:"user",content:
+`You are the analyst on a dark-hours pricing desk for tokenized US equities (Bitget rTokens).
+Answer the trader's question using ONLY the desk state below. Quote the real figures. If the state
+does not contain what's needed, say so rather than estimating. Be direct and concise — about 130 words,
+plain prose, no headings or bullet lists. Never tell them to buy or sell; describe what the pricing
+evidence supports and what the risk is. Remember the central finding: early in the dark window the
+venue's quote is LESS informative than assuming the last close held, and it overshoots the repricing
+that actually sticks.
+
+${briefing()}
+
+TRADER'S QUESTION: ${q}`}],
+      {modelTier:"default",onText:({text})=>{out.textContent=text;}});
+    out.textContent=res.text;
+  }catch(e){
+    out.textContent=e&&e.code==="rate_limited"
+      ?"The research assistant is rate limited right now — try again shortly."
+      :"Couldn't reach the research assistant. The board above is still live.";
+  }finally{btn.disabled=false;}
+}
+$("askform").addEventListener("submit",e=>{e.preventDefault();ask();});
+
+load().catch(e=>{
+  $("statusbar").innerHTML=`<span class="chip"><span class="dot"></span>Couldn't reach Bitget — the measured record below is unaffected.</span>`;
+  console.error(e);
+});
+</script>
