@@ -34,20 +34,37 @@
   border-color: var(--color-line);
 }
 
+/* Dark is the default — this is a desk for the hours the market is shut.
+   [data-theme="light"] is stamped on <html> by the toggle (and by the inline
+   script in layout.tsx, so the first paint is already correct). */
+:root[data-theme="light"] {
+  --color-void: #fbfbfc;
+  --color-ink: #f4f5f7;
+  --color-panel: #ffffff;
+  --color-line: rgba(16, 21, 31, 0.09);
+  --color-line-bright: rgba(16, 21, 31, 0.16);
+
+  --color-fg: #10141b;
+  --color-muted: #5a6371;
+  --color-faint: #8a94a3;
+
+  --color-mint: #0b8f62;
+  --color-mint-dim: #cfeade;
+  --color-danger: #c9334a;
+  --color-amber: #ad6c12;
+  --color-cyan: #1a72a8;
+  --color-violet: #6244c4;
+  --color-champagne: #9a7c3f;
+}
+
 html {
   background: var(--color-void);
   color-scheme: dark;
 }
+:root[data-theme="light"] { color-scheme: light; }
 
 body {
-  background:
-    radial-gradient(1100px 720px at 84% -18%, rgba(216, 192, 140, 0.07), transparent 55%),
-    radial-gradient(900px 620px at 8% -8%, rgba(78, 230, 168, 0.055), transparent 52%),
-    radial-gradient(820px 520px at 66% 30%, rgba(216, 192, 140, 0.035), transparent 60%),
-    radial-gradient(760px 520px at 22% 52%, rgba(78, 230, 168, 0.03), transparent 60%),
-    radial-gradient(1000px 820px at 50% 122%, rgba(87, 199, 255, 0.045), transparent 55%),
-    var(--color-void);
-  background-attachment: fixed;
+  background: var(--color-void);
   color: var(--color-fg);
   font-family: var(--font-sans);
   letter-spacing: -0.011em;
@@ -64,38 +81,32 @@ body::before {
   inset: 0;
   z-index: 1;
   pointer-events: none;
-  opacity: 0.028;
+  opacity: 0.02;
   background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
-/* subtle scanline grid behind everything */
-.grid-atmos {
-  background-image:
-    linear-gradient(var(--color-line) 1px, transparent 1px),
-    linear-gradient(90deg, var(--color-line) 1px, transparent 1px);
-  background-size: 48px 48px;
-  mask-image: radial-gradient(120% 120% at 50% 0%, #000 30%, transparent 80%);
-}
+:root[data-theme="light"] body::before { opacity: 0; }
 
 /* glass panel — frosted, floats over the warm-glow background (Paradyze feel) */
 .glass {
-  background:
-    radial-gradient(130% 130% at 0% 0%, rgba(255, 255, 255, 0.05), transparent 46%),
-    linear-gradient(180deg, rgba(20, 22, 28, 0.55), rgba(12, 13, 18, 0.42));
+  background: rgba(17, 19, 25, 0.62);
   border: 1px solid var(--color-line);
-  border-radius: 16px;
-  backdrop-filter: blur(18px) saturate(1.15);
-  -webkit-backdrop-filter: blur(18px) saturate(1.15);
-  box-shadow:
-    0 1px 0 0 rgba(255, 255, 255, 0.05) inset,
-    0 30px 70px -40px rgba(0, 0, 0, 0.95);
+  border-radius: 14px;
+  backdrop-filter: blur(20px) saturate(1.1);
+  -webkit-backdrop-filter: blur(20px) saturate(1.1);
+  box-shadow: 0 24px 60px -44px rgba(0, 0, 0, 0.9);
+}
+:root[data-theme="light"] .glass {
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 1px 2px rgba(16, 21, 31, 0.04), 0 18px 44px -34px rgba(16, 21, 31, 0.28);
 }
 /* tighter inner panel, for nested cards / orderbook rows */
 .panel {
-  background: rgba(255, 255, 255, 0.018);
+  background: rgba(255, 255, 255, 0.022);
   border: 1px solid var(--color-line);
-  border-radius: 12px;
+  border-radius: 11px;
 }
+:root[data-theme="light"] .panel { background: rgba(16, 21, 31, 0.022); }
 
 .hairline {
   border: 1px solid var(--color-line);
@@ -127,6 +138,7 @@ body::before {
 
 /* glow text */
 .glow-mint { text-shadow: 0 0 24px rgba(78, 230, 168, 0.45); }
+:root[data-theme="light"] .glow-mint { text-shadow: none; }
 .glow-danger { text-shadow: 0 0 24px rgba(255, 93, 108, 0.45); }
 
 /* live pulse dot */
@@ -234,26 +246,6 @@ button:disabled,
 }
 @media (prefers-reduced-motion: reduce) {
   .marquee-track { animation: none; }
-}
-
-/* ── cursor spotlight reveal ─────────────────────────────────────────────── */
-.spotlight-base {
-  background-image:
-    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
-  background-size: 54px 54px;
-}
-.spotlight-reveal {
-  background-image:
-    linear-gradient(rgba(78, 230, 168, 0.22) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(87, 199, 255, 0.18) 1px, transparent 1px);
-  background-size: 54px 54px;
-  -webkit-mask-image: radial-gradient(circle 230px at var(--mx, -999px) var(--my, -999px), #000 0%, rgba(0, 0, 0, 0.55) 42%, transparent 72%);
-  mask-image: radial-gradient(circle 230px at var(--mx, -999px) var(--my, -999px), #000 0%, rgba(0, 0, 0, 0.55) 42%, transparent 72%);
-}
-.spotlight-glow {
-  background: radial-gradient(circle 320px at var(--mx, -999px) var(--my, -999px), rgba(78, 230, 168, 0.1), transparent 70%);
-  transition: opacity 0.4s;
 }
 
 /* ── premium load animations (blur-rise, staggered) ─────────────────────── */

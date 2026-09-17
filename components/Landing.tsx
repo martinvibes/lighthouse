@@ -1,14 +1,10 @@
 "use client";
 import Link from "next/link";
-import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Eye, ShieldCheck, Layers, ArrowRight, MoonStar } from "lucide-react";
 import LivePreview from "@/components/LivePreview";
 import { useDesk } from "@/lib/desk";
 import { curveFor, exceedProb } from "@/lib/risk";
-
-// WebGL scan grid — the beam sweeping the dark. Client only, no SSR.
-const GridScan = dynamic(() => import("@/components/GridScan"), { ssr: false });
 
 const reveal = {
   initial: { opacity: 0, y: 24 },
@@ -26,29 +22,6 @@ export default function Landing() {
     <main className="relative z-10 overflow-hidden">
       {/* ───────────────────────── HERO ───────────────────────── */}
       <section className="relative">
-        <div
-          className="absolute inset-x-0 top-0 h-[860px] overflow-hidden pointer-events-none"
-          style={{
-            maskImage: "radial-gradient(120% 78% at 50% 34%, #000 38%, transparent 82%)",
-            WebkitMaskImage: "radial-gradient(120% 78% at 50% 34%, #000 38%, transparent 82%)",
-          }}
-        >
-          <GridScan
-            enableWebcam={false}
-            sensitivity={0.5}
-            lineThickness={1}
-            linesColor="#1f3a30"
-            gridScale={0.1}
-            scanColor="#4ee6a8"
-            scanOpacity={0.5}
-            scanDirection="forward"
-            enablePost
-            bloomIntensity={0.5}
-            chromaticAberration={0.0015}
-            noiseIntensity={0.012}
-          />
-        </div>
-
         <div className="relative max-w-[1100px] mx-auto px-5 md:px-8 pt-24 md:pt-32 pb-16 text-center">
           <div
             className="anim anim-fade inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 hairline mb-8"
@@ -74,10 +47,8 @@ export default function Landing() {
             className="anim anim-fade text-[var(--color-muted)] text-[17px] md:text-[20px] leading-relaxed mt-7 max-w-[640px] mx-auto"
             style={{ animationDelay: "0.55s" }}
           >
-            For eight hours a night Bitget keeps quoting tokenized US equities with no US venue open behind
-            them, and says plainly they are indicative quotes, not transaction prices. Lighthouse has graded{" "}
-            {led ? led.summary.n_rows.toLocaleString() : "20,934"} of those quotes against the reopen they were
-            predicting. Tonight it tells you which ones to believe.
+            Eight hours a night, these prices have no market behind them.
+            We graded {led ? led.summary.n_rows.toLocaleString() : "20,934"} of them against the open that followed.
           </p>
 
           <div
@@ -151,7 +122,7 @@ export default function Landing() {
           icon={Eye}
           eyebrow="Measured, not asserted"
           title="Every claim has a number behind it."
-          body="Weights are refitted on a rolling window of already-closed nights, then scored against a reopen they never saw. The whole ledger ships as a CSV. Two hours into the dark window Bitget's own quote is worse than assuming the close held — we did not expect that either, and we published it."
+          body="Weights are refitted on closed nights, then scored against a reopen they never saw. Two hours into the dark window Bitget's own quote is worse than assuming the close held. We did not expect that either, and we published it."
           visual={<EvidenceVisual led={led} />}
         />
         <Feature
@@ -159,14 +130,14 @@ export default function Landing() {
           icon={ShieldCheck}
           eyebrow="The money question"
           title="Your margin is marked on a price nobody traded on."
-          body="rTokens are accepted as unified-account collateral at up to 95%. Between 20:00 and 04:00 ET the mark on your book is the indicative quote. Put in a position and Lighthouse reads the gap straight off the ledger — and gives you the odds the reopen takes you through liquidation."
+          body="rTokens are collateral at up to 95%, marked at the indicative quote all night. Put in a position and we read the gap off the ledger, then give you the odds the reopen takes you through liquidation."
           visual={<MirageVisual cal={cal} />}
         />
         <Feature
           icon={Layers}
           eyebrow="An analyst that cannot bluff"
           title="Answers you can check line by line."
-          body="The research model gets tonight's board, the shrinkage weights in force and the walk-forward error table — and nothing else. No browser, no memory, no prices of its own. The exact context is printed next to every answer so you can audit where each figure came from."
+          body="The analyst gets the board and the error table, and nothing else. Then every figure it quotes is matched back against that context before it renders. A number it invented is a number you never see."
           visual={<ContextVisual />}
         />
       </section>

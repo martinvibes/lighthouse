@@ -49,8 +49,6 @@ export default function Research() {
 
   return (
     <main className="relative min-h-screen px-4 md:px-6 py-8 max-w-[1480px] mx-auto z-10">
-      <div className="grid-atmos fixed inset-0 -z-10 opacity-25" />
-
       <motion.header initial={{ opacity: 0, y: -14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
         <div className="label mb-4">an analyst that cannot bluff</div>
         <h1 className="display text-[clamp(32px,5.2vw,54px)] leading-[1.02] max-w-[20ch]">
