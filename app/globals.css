@@ -263,3 +263,8 @@ button:disabled,
 @media (prefers-reduced-motion: reduce) {
   .anim { animation: none; opacity: 1; }
 }
+
+/* The hero scan is built for the dark; on a light ground it only needs to whisper. */
+.hero-scan { opacity: 1; transition: opacity 0.4s ease; }
+:root[data-theme="light"] .hero-scan { opacity: 0.3; }
+@media (prefers-reduced-motion: reduce) { .hero-scan { opacity: 0.35; } }

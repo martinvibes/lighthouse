@@ -1,10 +1,14 @@
 "use client";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Eye, ShieldCheck, Layers, ArrowRight, MoonStar } from "lucide-react";
 import LivePreview from "@/components/LivePreview";
 import { useDesk } from "@/lib/desk";
 import { curveFor, exceedProb } from "@/lib/risk";
+
+// WebGL scan grid — the beam sweeping the dark. Client only, no SSR.
+const GridScan = dynamic(() => import("@/components/GridScan"), { ssr: false });
 
 const reveal = {
   initial: { opacity: 0, y: 24 },
@@ -22,6 +26,29 @@ export default function Landing() {
     <main className="relative z-10 overflow-hidden">
       {/* ───────────────────────── HERO ───────────────────────── */}
       <section className="relative">
+        <div
+          className="hero-scan absolute inset-x-0 top-0 h-[860px] overflow-hidden pointer-events-none"
+          style={{
+            maskImage: "radial-gradient(120% 78% at 50% 34%, #000 38%, transparent 82%)",
+            WebkitMaskImage: "radial-gradient(120% 78% at 50% 34%, #000 38%, transparent 82%)",
+          }}
+        >
+          <GridScan
+            enableWebcam={false}
+            sensitivity={0.5}
+            lineThickness={1}
+            linesColor="#1f3a30"
+            gridScale={0.1}
+            scanColor="#4ee6a8"
+            scanOpacity={0.5}
+            scanDirection="forward"
+            enablePost
+            bloomIntensity={0.5}
+            chromaticAberration={0.0015}
+            noiseIntensity={0.012}
+          />
+        </div>
+
         <div className="relative max-w-[1100px] mx-auto px-5 md:px-8 pt-24 md:pt-32 pb-16 text-center">
           <div
             className="anim anim-fade inline-flex items-center gap-2 rounded-full px-3.5 py-1.5 hairline mb-8"
