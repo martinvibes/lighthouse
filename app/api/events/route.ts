@@ -55,15 +55,26 @@ export async function GET() {
     }
 
     const today = new Date();
-    const r = await callTool(conn.session, query.name, {
-      entry_id: entry,
-      params: { start_date: iso(today), end_date: iso(new Date(+today + 70 * 864e5)) },
-    });
-    if (!r.ok) return fail(`The calendar query failed: ${r.error}`);
 
-    const rows = ((r.data as { data?: { results?: unknown[] } })?.data?.results ?? []) as {
-      report_date?: string; symbol?: string; eps_consensus?: number | null;
-    }[];
+    // The catalogue caps a response at 1500 rows, and a wide date range silently
+    // truncates — AAPL fell off a 70-day pull. Ask a week at a time instead.
+    const CHUNK = 7, WEEKS = 10;
+    const chunks = Array.from({ length: WEEKS }, (_, i) => ({
+      start_date: iso(new Date(+today + i * CHUNK * 864e5)),
+      end_date: iso(new Date(+today + ((i + 1) * CHUNK - 1) * 864e5)),
+    }));
+
+    const replies = await Promise.all(chunks.map((params) =>
+      callTool(conn.session, query.name, { entry_id: entry, params })
+        .catch(() => ({ ok: false as const, error: "call failed" }))
+    ));
+    if (!replies.some((r) => r.ok)) return fail("Every calendar query failed.");
+
+    const rows = replies.flatMap((r) =>
+      r.ok ? (((r.data as { data?: { results?: unknown[] } })?.data?.results ?? []) as {
+        report_date?: string; symbol?: string; eps_consensus?: number | null;
+      }[]) : []
+    );
 
     const midnight = +new Date(iso(today));
     const byTicker: Record<string, Earnings> = {};
@@ -83,7 +94,7 @@ export async function GET() {
 
     const payload = {
       ok: true, endpoint: MCP_URL, tool: query.name, entry,
-      n_rows: rows.length, calendar: byTicker,
+      n_rows: rows.length, n_names: Object.keys(byTicker).length, calendar: byTicker,
     };
     cache = { at: Date.now(), payload };
     return Response.json(payload);

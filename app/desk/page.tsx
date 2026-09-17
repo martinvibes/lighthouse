@@ -29,8 +29,15 @@ const rise = (d: number) => ({
 });
 
 export default function DeskPage() {
-  const { rows, band, win, err } = useDesk();
+  const { rows, band, win, err, events, eventsNote } = useDesk();
   const wide = rows.filter((r) => r.wide).length;
+  // The next reports due on the names we watch. A quote far from fair value with a
+  // report a day out is news, not drift — the desk should see it coming.
+  const ahead = rows
+    .map((r) => events[r.ticker])
+    .filter((e): e is NonNullable<typeof e> => !!e && e.days >= 0)
+    .sort((a, b) => a.days - b.days)
+    .slice(0, 8);
 
   return (
     <main className="relative min-h-screen px-4 md:px-6 py-7 max-w-[1320px] mx-auto z-10">
@@ -81,6 +88,22 @@ export default function DeskPage() {
         <Tile label="through the window"
               value={win ? `${(win.elapsed * 100).toFixed(0)}%` : "—"} sub="20:00 → 04:00 ET" />
       </motion.section>
+
+      {(ahead.length > 0 || eventsNote) && (
+        <motion.div {...rise(0.08)} className="flex items-center gap-3 mt-3 hairline rounded-xl px-4 py-2.5 overflow-x-auto no-scrollbar"
+                    style={{ background: "rgba(255,255,255,0.02)" }}>
+          <span className="label shrink-0">earnings ahead</span>
+          {ahead.length > 0 ? ahead.map((e) => (
+            <span key={e.symbol} className="shrink-0 text-[12.5px]">
+              <span className={e.days <= 2 ? "font-medium" : ""}
+                    style={e.days <= 2 ? { color: "var(--color-amber)" } : undefined}>{e.symbol}</span>
+              <span className="tnum text-[11.5px] text-[var(--color-faint)] ml-1.5">{e.days}d</span>
+            </span>
+          )) : <span className="label shrink-0">{eventsNote}</span>}
+          <span className="flex-1" />
+          <span className="label shrink-0 hidden md:inline">bitget agent server · mcp</span>
+        </motion.div>
+      )}
 
       <motion.section {...rise(0.1)} className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-4">
         <div className="lg:col-span-8"><Instrument /></div>
