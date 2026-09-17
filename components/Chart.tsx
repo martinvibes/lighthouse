@@ -8,7 +8,10 @@ import type { Candle } from "@/lib/bitget";
 
 type Line = { price: number; color: string; title: string; dashed?: boolean };
 
-const css = (v: string) => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const C = {
+  faint: "#5a5e68", line: "rgba(255,255,255,0.05)", lineBright: "rgba(255,255,255,0.1)",
+  mint: "#4ee6a8", danger: "#ff5d6c",
+};
 
 export default function Chart({ candles, lines, height = 340 }: {
   candles: Candle[]; lines: Line[]; height?: number;
@@ -24,24 +27,24 @@ export default function Chart({ candles, lines, height = 340 }: {
       height,
       layout: {
         background: { type: ColorType.Solid, color: "transparent" },
-        textColor: css("--faint"),
+        textColor: C.faint,
         fontFamily: "var(--font-mono), monospace",
         fontSize: 10,
       },
-      grid: { vertLines: { color: css("--line-soft") }, horzLines: { color: css("--line-soft") } },
-      rightPriceScale: { borderColor: css("--line"), scaleMargins: { top: 0.12, bottom: 0.12 } },
-      timeScale: { borderColor: css("--line"), timeVisible: true, secondsVisible: false, rightOffset: 4 },
+      grid: { vertLines: { color: C.line }, horzLines: { color: C.line } },
+      rightPriceScale: { borderColor: C.lineBright, scaleMargins: { top: 0.12, bottom: 0.12 } },
+      timeScale: { borderColor: C.lineBright, timeVisible: true, secondsVisible: false, rightOffset: 4 },
       crosshair: {
         mode: CrosshairMode.Normal,
-        vertLine: { color: css("--lamp"), width: 1, style: LineStyle.Dotted, labelBackgroundColor: css("--lamp") },
-        horzLine: { color: css("--lamp"), width: 1, style: LineStyle.Dotted, labelBackgroundColor: css("--lamp") },
+        vertLine: { color: C.mint, width: 1, style: LineStyle.Dotted, labelBackgroundColor: C.mint },
+        horzLine: { color: C.mint, width: 1, style: LineStyle.Dotted, labelBackgroundColor: C.mint },
       },
       handleScale: { axisPressedMouseMove: { time: true, price: false } },
     });
     const s = c.addCandlestickSeries({
-      upColor: css("--up"), downColor: css("--down"),
-      borderUpColor: css("--up"), borderDownColor: css("--down"),
-      wickUpColor: css("--up"), wickDownColor: css("--down"),
+      upColor: C.mint, downColor: C.danger,
+      borderUpColor: C.mint, borderDownColor: C.danger,
+      wickUpColor: C.mint, wickDownColor: C.danger,
     });
     chart.current = c; series.current = s;
     const ro = new ResizeObserver(() => box.current && c.applyOptions({ width: box.current.clientWidth }));

@@ -5,12 +5,13 @@ export const dynamic = "force-dynamic";
 
 /**
  * Research answers are generated against the desk state the page sends, and
- * nothing else. Works with any OpenAI-compatible endpoint; the hackathon's Qwen
- * credits (https://hackathon.bitgetops.com/v1, qwen3.8-max) drop straight in.
+ * nothing else. Any OpenAI-compatible endpoint works: point LLM_BASE_URL and
+ * LLM_MODEL elsewhere (the hackathon's Qwen credits drop straight in) and the
+ * rest of this file is unchanged.
  */
-const BASE = process.env.LLM_BASE_URL || "https://hackathon.bitgetops.com/v1";
-const MODEL = process.env.LLM_MODEL || "qwen3.8-max";
-const KEY = process.env.LLM_API_KEY;
+const BASE = process.env.LLM_BASE_URL || "https://api.openai.com/v1";
+const MODEL = process.env.LLM_MODEL || "gpt-4o-mini";
+const KEY = process.env.OPENAI_API_KEY || process.env.LLM_API_KEY;
 
 const SYSTEM = `You are the analyst on Lighthouse, a dark-hours pricing desk for tokenized US equities (Bitget rTokens).
 
@@ -25,7 +26,7 @@ than assuming the last close held, and it overshoots the repricing that actually
 export async function POST(req: NextRequest) {
   if (!KEY) {
     return Response.json(
-      { error: "The research assistant is not configured on this deployment. Set LLM_API_KEY to enable it. The board and the measured record are unaffected." },
+      { error: "The research assistant is not configured on this deployment. Set OPENAI_API_KEY to enable it. The board and the measured record are unaffected." },
       { status: 503 }
     );
   }

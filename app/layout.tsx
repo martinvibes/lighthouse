@@ -1,24 +1,33 @@
 import type { Metadata } from "next";
-import { Instrument_Serif, Archivo, JetBrains_Mono } from "next/font/google";
+import { Fraunces, Hanken_Grotesk, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import Nav from "@/components/Nav";
 import { DeskProvider } from "@/lib/desk";
-import Shell from "@/components/Shell";
 
-const display = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-display" });
-const ui = Archivo({ subsets: ["latin"], variable: "--font-ui" });
-const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
+const display = Fraunces({
+  weight: ["400", "500", "600", "700"],
+  style: ["normal", "italic"],
+  subsets: ["latin"],
+  variable: "--font-display",
+  display: "swap",
+});
+const sans = Hanken_Grotesk({ subsets: ["latin"], variable: "--font-sans", display: "swap" });
+const mono = JetBrains_Mono({ weight: ["400", "500", "600"], subsets: ["latin"], variable: "--font-mono", display: "swap" });
 
 export const metadata: Metadata = {
-  title: "Lighthouse — dark-hours desk for tokenized US stocks",
+  title: "Lighthouse — the dark-hours desk for tokenized US stocks",
   description:
-    "Bitget's rToken prices outside US hours are indicative quotes, not transaction prices. Lighthouse measures how much of tonight's quote survives to the 04:00 ET reopen.",
+    "Bitget's rToken prices outside US hours are indicative quotes, not transaction prices. Lighthouse measures how much of tonight's quote survives to the 04:00 ET reopen — and what that gap does to your collateral.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${ui.variable} ${mono.variable}`}>
+    <html lang="en" className={`${display.variable} ${sans.variable} ${mono.variable}`}>
       <body>
-        <DeskProvider><Shell>{children}</Shell></DeskProvider>
+        <DeskProvider>
+          <Nav />
+          {children}
+        </DeskProvider>
       </body>
     </html>
   );

@@ -1,5 +1,6 @@
 "use client";
 import { useEffect, useMemo, useState } from "react";
+import { motion } from "framer-motion";
 import { useDesk } from "@/lib/desk";
 import { curveFor, exceedProb } from "@/lib/risk";
 
@@ -21,14 +22,13 @@ export default function Collateral() {
 
   const book = useMemo(() => legs.map((l) => {
     const r = rows.find((x) => x.symbol === l.symbol);
-    return r ? { ...l, r, venue: l.qty * r.quote, fair: l.qty * r.fair } : null;
-  }).filter(Boolean) as { symbol: string; qty: number; r: (typeof rows)[0]; venue: number; fair: number }[], [legs, rows]);
+    return r ? { ...l, venue: l.qty * r.quote, fair: l.qty * r.fair } : null;
+  }).filter(Boolean) as { symbol: string; qty: number; venue: number; fair: number }[], [legs, rows]);
 
   const V = book.reduce((s, b) => s + b.venue, 0);
   const F = book.reduce((s, b) => s + b.fair, 0);
   const mirageBps = F > 0 ? ((V - F) / F) * 1e4 : 0;
-
-  const liqValue = debt / haircut;              // portfolio mark at which collateral stops covering the debt
+  const liqValue = debt / haircut;              // mark at which collateral stops covering the debt
   const distVenue = V > 0 ? ((V - liqValue) / V) * 1e4 : 0;
   const distFair = F > 0 ? ((F - liqValue) / F) * 1e4 : 0;
   const mrVenue = debt > 0 ? (V * haircut) / debt : Infinity;
@@ -50,136 +50,163 @@ export default function Collateral() {
   }, [tails, book, horizon]);
 
   const pCross = !blended || !tails ? null : distFair > 0 ? exceedProb(tails, blended, distFair) / 2 : 0.5;
-  const severity = pCross === null ? "unknown" : pCross > 0.10 ? "bad" : pCross > 0.03 ? "warn" : "ok";
+  const sev = pCross === null ? "ok" : pCross > 0.1 ? "bad" : pCross > 0.03 ? "warn" : "ok";
+  const sevColor = sev === "bad" ? "var(--color-danger)" : sev === "warn" ? "var(--color-amber)" : "var(--color-mint)";
   const set = (i: number, patch: Partial<Leg>) => setLegs((ls) => ls.map((l, j) => (j === i ? { ...l, ...patch } : l)));
   const rich = Math.abs(mirageBps) > (band ?? 30);
 
   return (
-    <>
-      <section style={{ display: "grid", gap: 10, paddingTop: 4 }}>
-        <h1 className="serif" style={{ fontSize: 32, lineHeight: 1.12, maxWidth: "24ch" }}>
-          Your margin is marked at a price nobody traded on.
+    <main className="relative min-h-screen px-4 md:px-6 py-8 max-w-[1480px] mx-auto z-10">
+      <div className="grid-atmos fixed inset-0 -z-10 opacity-25" />
+
+      <motion.header initial={{ opacity: 0, y: -14 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55 }}>
+        <div className="label mb-4">the money question</div>
+        <h1 className="display text-[clamp(32px,5.4vw,56px)] leading-[1.02] max-w-[19ch]">
+          Your margin is marked on a price{" "}
+          <span className="italic" style={{ color: "var(--color-mint)" }}>nobody traded on.</span>
         </h1>
-        <p className="prose" style={{ maxWidth: "66ch" }}>
+        <p className="text-[15px] text-[var(--color-muted)] leading-relaxed mt-5 max-w-[640px]">
           Bitget accepts rTokens as collateral in the unified account at up to 95%. Between 20:00 and 04:00 ET
           no US venue is quoting, so the mark on your book is the indicative price — and we have measured, across{" "}
           {led ? led.summary.n_rows.toLocaleString() : "20,934"} graded forecasts, how far that quote tends to sit
           from where the market actually reopens. This is what that gap does to your liquidation distance.
         </p>
-      </section>
+      </motion.header>
 
-      <div className="grid-2">
-        <section className="panel">
-          <div className="panel-head">
-            <h3>Your book</h3>
-            <span className="spacer" />
-            <button className="btn ghost" style={{ padding: "5px 10px", fontSize: 12 }}
-              onClick={() => rows[0] && setLegs((l) => [...l, { symbol: rows[0].symbol, qty: 100 }])}>
-              + Add a leg
-            </button>
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-4 mt-8">
+        {/* ── the book ── */}
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.08, duration: 0.5 }}
+                    className="lg:col-span-7 glass overflow-hidden flex flex-col">
+          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-[var(--color-line)]">
+            <span className="text-[14px] font-semibold">Your book</span>
+            <span className="flex-1" />
+            <button
+              onClick={() => rows[0] && setLegs((l) => [...l, { symbol: rows[0].symbol, qty: 100 }])}
+              className="label rounded-full px-3 py-1.5 hairline hover:bg-white/[0.04] transition-colors"
+            >+ add a leg</button>
           </div>
-          <div className="tablewrap">
-            <table className="grid">
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-[13px]">
               <thead>
-                <tr><th>Holding</th><th>Quantity</th><th>At the venue mark</th><th>At fair value</th><th /></tr>
+                <tr className="border-b border-[var(--color-line)]">
+                  {["holding", "quantity", "at the venue mark", "at fair value", ""].map((h, i) => (
+                    <th key={h + i} className={`label py-2.5 px-3 ${i ? "text-right" : "text-left"}`}>{h}</th>
+                  ))}
+                </tr>
               </thead>
               <tbody>
                 {book.map((b, i) => (
-                  <tr key={i} style={{ cursor: "default" }}>
-                    <td>
-                      <select value={b.symbol} onChange={(e) => set(i, { symbol: e.target.value })}
-                              style={{ width: 128, padding: "5px 8px", fontSize: 12.5 }}>
-                        {rows.map((r) => <option key={r.symbol} value={r.symbol}>r{r.ticker}</option>)}
+                  <tr key={i} className="border-b border-[var(--color-line)] last:border-0">
+                    <td className="py-2.5 px-3">
+                      <select
+                        value={b.symbol} onChange={(e) => set(i, { symbol: e.target.value })}
+                        className="hairline rounded-lg px-2.5 py-1.5 text-[12.5px] outline-none"
+                        style={{ background: "rgba(255,255,255,0.03)", color: "var(--color-fg)" }}
+                      >
+                        {rows.map((r) => <option key={r.symbol} value={r.symbol} style={{ background: "#0f1014" }}>r{r.ticker}</option>)}
                       </select>
                     </td>
-                    <td>
-                      <input type="number" value={b.qty} min={0}
-                             onChange={(e) => set(i, { qty: Math.max(0, +e.target.value) })}
-                             style={{ width: 96, padding: "5px 8px", fontSize: 12.5, textAlign: "right" }} />
+                    <td className="py-2.5 px-3 text-right">
+                      <input
+                        type="number" value={b.qty} min={0}
+                        onChange={(e) => set(i, { qty: Math.max(0, +e.target.value) })}
+                        className="tnum hairline rounded-lg px-2.5 py-1.5 text-[12.5px] w-[92px] text-right outline-none focus:border-[var(--color-mint)]"
+                        style={{ background: "rgba(255,255,255,0.03)", color: "var(--color-fg)" }}
+                      />
                     </td>
-                    <td className="num">{usd(b.venue)}</td>
-                    <td className="num lamp">{usd(b.fair)}</td>
-                    <td>
-                      <button className="btn ghost" style={{ padding: "3px 8px", fontSize: 11 }}
-                              onClick={() => setLegs((l) => l.filter((_, j) => j !== i))}>Remove</button>
+                    <td className="tnum py-2.5 px-3 text-right">{usd(b.venue)}</td>
+                    <td className="tnum py-2.5 px-3 text-right" style={{ color: "var(--color-cyan)" }}>{usd(b.fair)}</td>
+                    <td className="py-2.5 px-3 text-right">
+                      <button onClick={() => setLegs((l) => l.filter((_, j) => j !== i))}
+                              className="label hover:text-[var(--color-danger)] transition-colors">remove</button>
                     </td>
                   </tr>
                 ))}
-                {!book.length && <tr><td colSpan={5} className="faint" style={{ textAlign: "center", padding: 28 }}>
-                  Waiting for the board…</td></tr>}
+                {!book.length && <tr><td colSpan={5} className="label py-10 text-center">waiting for the board…</td></tr>}
               </tbody>
               <tfoot>
-                <tr>
-                  <td className="label">Total</td><td />
-                  <td className="num">{usd(V)}</td>
-                  <td className="num lamp">{usd(F)}</td><td />
+                <tr className="border-t border-[var(--color-line)]">
+                  <td className="label py-3 px-3">total</td><td />
+                  <td className="tnum py-3 px-3 text-right text-[15px]">{usd(V)}</td>
+                  <td className="tnum py-3 px-3 text-right text-[15px]" style={{ color: "var(--color-cyan)" }}>{usd(F)}</td>
+                  <td />
                 </tr>
               </tfoot>
             </table>
           </div>
-          <div className="panel-body" style={{ borderTop: "1px solid var(--line-soft)", display: "grid", gap: 14, gridTemplateColumns: "1fr 1fr" }}>
-            <label className="field">
-              <span>Borrowed against it (USDT)</span>
-              <input type="number" value={debt} min={0} step={1000} className="num"
-                     onChange={(e) => setDebt(Math.max(0, +e.target.value))} />
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 px-5 py-5 border-t border-[var(--color-line)]">
+            <label className="flex flex-col gap-2">
+              <span className="label">borrowed against it · usdt</span>
+              <input
+                type="number" value={debt} min={0} step={1000}
+                onChange={(e) => setDebt(Math.max(0, +e.target.value))}
+                className="tnum hairline rounded-xl px-3.5 py-2.5 text-[15px] outline-none focus:border-[var(--color-mint)]"
+                style={{ background: "rgba(255,255,255,0.03)", color: "var(--color-fg)" }}
+              />
             </label>
-            <label className="field">
-              <span>Collateral haircut · {(haircut * 100).toFixed(0)}%</span>
-              <input type="range" min={50} max={95} value={haircut * 100}
-                     onChange={(e) => setHaircut(+e.target.value / 100)}
-                     style={{ padding: 0, border: "none", background: "transparent", accentColor: "var(--lamp)" }} />
+            <label className="flex flex-col gap-2">
+              <span className="label">collateral haircut · {(haircut * 100).toFixed(0)}%</span>
+              <input
+                type="range" min={50} max={95} value={haircut * 100}
+                onChange={(e) => setHaircut(+e.target.value / 100)}
+                className="mandate-slider mt-3"
+                style={{
+                  ["--thumb" as string]: "var(--color-mint)",
+                  background: `linear-gradient(90deg, var(--color-mint) ${((haircut * 100 - 50) / 45) * 100}%, rgba(255,255,255,0.08) ${((haircut * 100 - 50) / 45) * 100}%)`,
+                }}
+              />
             </label>
           </div>
-        </section>
+        </motion.div>
 
-        <section className="panel">
-          <div className="panel-head">
-            <h3>The mirage</h3>
-            <span className="spacer" />
-            <span className={`pill ${severity === "bad" ? "warn" : severity === "warn" ? "live" : ""}`}>
-              {severity === "bad" ? "Exposed" : severity === "warn" ? "Thin" : "Comfortable"}
+        {/* ── the mirage ── */}
+        <motion.div initial={{ opacity: 0, y: 14 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.14, duration: 0.5 }}
+                    className="lg:col-span-5 glass overflow-hidden">
+          <div className="flex items-center gap-3 px-5 py-3.5 border-b border-[var(--color-line)]">
+            <span className="text-[14px] font-semibold">The mirage</span>
+            <span className="flex-1" />
+            <span className="label rounded-full px-2.5 py-1" style={{ color: sevColor, background: "rgba(255,255,255,0.04)" }}>
+              {sev === "bad" ? "exposed" : sev === "warn" ? "thin" : "comfortable"}
             </span>
           </div>
-          <div className="panel-body" style={{ display: "grid", gap: 16 }}>
+
+          <div className="px-5 py-5 flex flex-col gap-5">
             <div>
-              <div className="label">Chance the 04:00 reopen takes you through liquidation</div>
-              <div className="num" style={{
-                fontSize: 52, letterSpacing: "-.045em", lineHeight: 1.05, marginTop: 4,
-                color: severity === "bad" ? "var(--down)" : severity === "warn" ? "var(--lamp)" : "var(--up)",
-              }}>
+              <div className="label">chance the 04:00 reopen takes you through liquidation</div>
+              <div className="tnum text-[54px] leading-none mt-2"
+                   style={{ color: sevColor, textShadow: `0 0 30px ${sevColor}55` }}>
                 {pCross === null ? "—" : `${(pCross * 100).toFixed(1)}%`}
               </div>
-              <div className="faint" style={{ fontSize: 12, marginTop: 4 }}>
+              <p className="text-[11.5px] text-[var(--color-muted)] mt-2 leading-relaxed">
                 Read off the measured error distribution for the names you actually hold, at{" "}
                 {win ? `${(win.elapsed * 100).toFixed(0)}%` : "this point"} through the window. Not a volatility
                 model — a count of how often we have been that wrong before.
-              </div>
+              </p>
             </div>
 
-            <div style={{ height: 1, background: "var(--line-soft)" }} />
-
-            <div className="grid-2" style={{ gap: 14 }}>
-              <Split title="What the venue shows you" value={usd(V * haircut)}
-                     rows={[["Margin ratio", mrVenue === Infinity ? "∞" : `${mrVenue.toFixed(2)}×`],
-                            ["Room to liquidation", `${distVenue.toFixed(0)} bps`]]} />
-              <Split title="What the reopen is likely to honour" value={usd(F * haircut)} lamp
-                     rows={[["Margin ratio", mrFair === Infinity ? "∞" : `${mrFair.toFixed(2)}×`],
-                            ["Room to liquidation", `${distFair.toFixed(0)} bps`]]} />
+            <div className="grid grid-cols-2 gap-3">
+              <Split title="venue shows you" value={usd(V * haircut)}
+                     rows={[["margin ratio", mrVenue === Infinity ? "∞" : `${mrVenue.toFixed(2)}×`],
+                            ["room to liq.", `${distVenue.toFixed(0)} bps`]]} />
+              <Split title="history honours" value={usd(F * haircut)} c="var(--color-cyan)"
+                     rows={[["margin ratio", mrFair === Infinity ? "∞" : `${mrFair.toFixed(2)}×`],
+                            ["room to liq.", `${distFair.toFixed(0)} bps`]]} />
             </div>
 
-            <div style={{
-              border: "1px solid", borderRadius: "var(--r)", padding: "12px 14px",
-              borderColor: rich ? "color-mix(in srgb, var(--down) 45%, transparent)" : "var(--line)",
-              background: rich ? "color-mix(in srgb, var(--down) 7%, transparent)" : "var(--panel-2)",
+            <div className="rounded-xl px-4 py-3.5" style={{
+              background: rich ? "rgba(255,93,108,0.07)" : "rgba(255,255,255,0.02)",
+              border: `1px solid ${rich ? "rgba(255,93,108,0.28)" : "var(--color-line)"}`,
             }}>
-              <div className="label">The verdict</div>
-              <p style={{ margin: "6px 0 0", fontSize: 13.5, lineHeight: 1.6 }}>
+              <div className="label mb-1.5">the verdict</div>
+              <p className="text-[13px] leading-relaxed">
                 {!book.length ? "Add a holding to see it." : (
                   <>
                     Your book is marked{" "}
-                    <b className="num" style={{ color: mirageBps >= 0 ? "var(--down)" : "var(--up)" }}>
+                    <span className="tnum font-semibold" style={{ color: mirageBps >= 0 ? "var(--color-danger)" : "var(--color-mint)" }}>
                       {Math.abs(mirageBps).toFixed(0)} bps {mirageBps >= 0 ? "richer" : "cheaper"}
-                    </b>{" "}
+                    </span>{" "}
                     than fair value — {usd(Math.abs(V - F))} of{" "}
                     {mirageBps >= 0 ? "collateral you may not actually have" : "collateral the venue is not crediting you"}.
                     {debt > 0 && <> The venue says there is {distVenue.toFixed(0)} bps of room before liquidation;
@@ -191,48 +218,53 @@ export default function Collateral() {
               </p>
             </div>
           </div>
-          <div className="panel-note">
+
+          <div className="px-5 py-3 border-t border-[var(--color-line)] text-[11px] text-[var(--color-faint)] leading-relaxed">
             Simplified unified-account arithmetic: collateral = mark × haircut, liquidation when collateral stops
-            covering the debt. Bitget&apos;s own maintenance rules govern your real account.
+            covering the debt. Correlation between holdings is ignored, making the figure a floor. Bitget&apos;s own
+            maintenance rules govern your real account.
           </div>
-        </section>
-      </div>
+        </motion.div>
+      </section>
 
       {cal && (
-        <section className="panel">
-          <div className="panel-head"><h3>Why the weekend is the dangerous one</h3></div>
-          <div className="panel-body grid-3">
-            <Big v={`${cal.weekend_gap.median_bps.toFixed(0)} bps`} k="median Friday close to Monday open" />
-            <Big v={`${cal.weekend_gap.p90_bps.toFixed(0)} bps`} k="at the 90th percentile" lamp />
-            <Big v={`${(cal.weekend_gap.share_over_200bps * 100).toFixed(0)}%`} k="of weekends reprice past 200 bps" bad />
+        <motion.section initial={{ opacity: 0, y: 14 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
+                        transition={{ duration: 0.5 }} className="glass mt-4 overflow-hidden">
+          <div className="px-5 py-3.5 border-b border-[var(--color-line)]">
+            <span className="text-[14px] font-semibold">Why the weekend is the dangerous one</span>
           </div>
-          <div className="panel-note">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 px-5 py-6">
+            <Big v={`${cal.weekend_gap.median_bps.toFixed(0)} bps`} k="median friday close → monday open" />
+            <Big v={`${cal.weekend_gap.p90_bps.toFixed(0)} bps`} k="at the 90th percentile" c="var(--color-amber)" />
+            <Big v={`${(cal.weekend_gap.share_over_200bps * 100).toFixed(0)}%`} k="of weekends reprice past 200 bps" c="var(--color-danger)" />
+          </div>
+          <div className="px-5 py-3 border-t border-[var(--color-line)] text-[11.5px] text-[var(--color-muted)]">
             Measured across {cal.weekend_gap.n} weekend windows. A 95% haircut leaves 5% of room, and roughly one
             weekend in five moves more than 2% before anyone can trade out of it.
           </div>
-        </section>
+        </motion.section>
       )}
-    </>
+    </main>
   );
 }
 
-const Split = ({ title, value, rows, lamp }: { title: string; value: string; rows: [string, string][]; lamp?: boolean }) => (
-  <div style={{ border: "1px solid var(--line)", borderRadius: "var(--r)", padding: "12px 13px" }}>
+const Split = ({ title, value, rows, c }: { title: string; value: string; rows: [string, string][]; c?: string }) => (
+  <div className="panel px-3.5 py-3.5">
     <div className="label">{title}</div>
-    <div className="num" style={{ fontSize: 22, letterSpacing: "-.035em", marginTop: 4, color: lamp ? "var(--lamp)" : undefined }}>{value}</div>
-    <div style={{ display: "grid", gap: 4, marginTop: 9 }}>
+    <div className="tnum text-[20px] mt-1.5" style={c ? { color: c } : undefined}>{value}</div>
+    <div className="flex flex-col gap-1 mt-3">
       {rows.map(([k, v]) => (
-        <div key={k} style={{ display: "flex", justifyContent: "space-between", fontSize: 12 }}>
-          <span className="faint">{k}</span><span className="num">{v}</span>
+        <div key={k} className="flex justify-between items-baseline">
+          <span className="label">{k}</span><span className="tnum text-[11.5px]">{v}</span>
         </div>
       ))}
     </div>
   </div>
 );
 
-const Big = ({ v, k, lamp, bad }: { v: string; k: string; lamp?: boolean; bad?: boolean }) => (
-  <div>
-    <div className="num" style={{ fontSize: 30, letterSpacing: "-.04em", color: bad ? "var(--down)" : lamp ? "var(--lamp)" : undefined }}>{v}</div>
-    <div className="dim" style={{ fontSize: 12.5, marginTop: 3 }}>{k}</div>
+const Big = ({ v, k, c }: { v: string; k: string; c?: string }) => (
+  <div className="panel px-4 py-4">
+    <div className="tnum text-[30px] leading-none" style={c ? { color: c } : undefined}>{v}</div>
+    <div className="text-[12px] text-[var(--color-muted)] mt-2">{k}</div>
   </div>
 );
