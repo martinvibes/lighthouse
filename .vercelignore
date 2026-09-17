@@ -1,0 +1,9 @@
+.venv
+data
+web
+tests
+scripts
+lighthouse
+*.py
+.next
+node_modules

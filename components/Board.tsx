@@ -1,82 +1,102 @@
 "use client";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { useDesk } from "@/lib/desk";
 import type { Row } from "@/lib/model";
 
-const fmtUsd = (v: number) => (v >= 1000 ? v.toFixed(0) : v.toFixed(2));
-const fmtBps = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(0)}`;
-const fmtVol = (v: number) => (v >= 1e9 ? `${(v / 1e9).toFixed(1)}B` : `${(v / 1e6).toFixed(0)}M`);
+type Key = "ticker" | "quote" | "chg" | "anchor" | "fair" | "dev" | "vol";
+const usd = (v: number) => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const compact = (v: number) => v >= 1e9 ? `$${(v / 1e9).toFixed(2)}B` : v >= 1e6 ? `$${(v / 1e6).toFixed(1)}M` : `$${(v / 1e3).toFixed(0)}K`;
 
-type Key = "ticker" | "volume" | "quoteRet" | "devBps";
+export default function Board() {
+  const { rows, meta, sel, setSel, band, loading } = useDesk();
+  const [key, setKey] = useState<Key>("dev");
+  const [asc, setAsc] = useState(false);
+  const [q, setQ] = useState("");
 
-export default function Board({ rows, selected, onSelect, factor, lam, band, live }: {
-  rows: Row[]; selected: string | null; onSelect: (s: string) => void;
-  factor: number; lam: [number, number]; band: number | null; live: boolean;
-}) {
-  const [key, setKey] = useState<Key>("devBps");
-  const [desc, setDesc] = useState(true);
+  const pick = (r: Row): number | string => ({
+    ticker: r.ticker, quote: r.quote, chg: meta[r.symbol]?.change24h ?? 0,
+    anchor: r.anchor, fair: r.fair, dev: Math.abs(r.devBps), vol: r.volume,
+  }[key]);
 
-  const sorted = [...rows].sort((a, b) => {
-    const va = key === "ticker" ? a.ticker : Math.abs(a[key] as number);
-    const vb = key === "ticker" ? b.ticker : Math.abs(b[key] as number);
-    if (typeof va === "string" && typeof vb === "string") return desc ? vb.localeCompare(va) : va.localeCompare(vb);
-    return desc ? (vb as number) - (va as number) : (va as number) - (vb as number);
-  });
-  const wide = rows.filter((r) => r.wide).length;
-  const click = (k: Key) => { if (k === key) setDesc(!desc); else { setKey(k); setDesc(true); } };
-  const arrow = (k: Key) => (k === key ? (desc ? " ↓" : " ↑") : "");
+  const view = useMemo(() => {
+    const f = rows.filter((r) => !q || r.ticker.toLowerCase().includes(q.toLowerCase()));
+    return [...f].sort((a, b) => {
+      const x = pick(a), y = pick(b);
+      const c = typeof x === "string" ? String(x).localeCompare(String(y)) : (x as number) - (y as number);
+      return asc ? c : -c;
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rows, meta, key, asc, q]);
+
+  const head = (k: Key, label: string) => (
+    <th onClick={() => { key === k ? setAsc(!asc) : (setKey(k), setAsc(k === "ticker")); }}
+        style={key === k ? { color: "var(--lamp)" } : undefined}>
+      {label}{key === k ? (asc ? " ↑" : " ↓") : ""}
+    </th>
+  );
 
   return (
-    <section>
-      <div className="sechead">
-        <div>
-          <h2 className="serif">{live ? "The board, live" : "The board, last dark window"}</h2>
-          <p className="sub">
-            {rows.length} of the most-traded rTokens. Cross-sectional factor is{" "}
-            <b className="mono">{fmtBps(factor * 1e4)} bps</b>; shrinkage in force is{" "}
-            <b className="mono">{lam[0].toFixed(2)}</b> on the common move and{" "}
-            <b className="mono">{lam[1].toFixed(2)}</b> on the name-specific part.{" "}
-            {wide ? <><b>{wide}</b> quoting outside the ±{band?.toFixed(0)} bps band.</> : "All inside band."}
-            {" "}Click a row for its chart.
-          </p>
-        </div>
+    <section className="panel">
+      <div className="panel-head">
+        <h3>Tonight&apos;s board</h3>
+        <span className="label">{rows.length} names</span>
+        <span className="spacer" />
+        <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Filter ticker"
+               style={{ width: 150, padding: "6px 10px", fontSize: 12.5 }} />
       </div>
       <div className="tablewrap">
-        <table>
+        <table className="grid">
           <thead>
             <tr>
-              <th className="sortable" onClick={() => click("ticker")}>Instrument{arrow("ticker")}</th>
-              <th className="sortable" onClick={() => click("volume")}>24h volume{arrow("volume")}</th>
-              <th>Session close</th>
-              <th>Venue quote</th>
-              <th className="sortable" onClick={() => click("quoteRet")}>Quote move{arrow("quoteRet")}</th>
-              <th>Fair value</th>
-              <th className="sortable" onClick={() => click("devBps")}>Quote − fair{arrow("devBps")}</th>
+              {head("ticker", "Instrument")}
+              {head("quote", "Venue quote")}
+              {head("chg", "24h")}
+              {head("anchor", "Session close")}
+              {head("fair", "Fair value")}
+              {head("dev", "Quote − fair")}
               <th>Verdict</th>
+              {head("vol", "24h turnover")}
             </tr>
           </thead>
           <tbody>
-            {!sorted.length && <tr><td colSpan={8} className="skel">Fetching the universe…</td></tr>}
-            {sorted.map((r) => (
-              <tr key={r.symbol} className={`stripe ${r.wide ? "wide" : ""} ${selected === r.symbol ? "sel" : ""}`}
-                onClick={() => onSelect(r.symbol)}>
-                <td className="tkr">{r.ticker}<span>{r.symbol}</span></td>
-                <td className="num">{fmtVol(r.volume)}</td>
-                <td className="num">{fmtUsd(r.anchor)}</td>
-                <td className="num">{fmtUsd(r.quote)}</td>
-                <td className="num" style={{ color: r.quoteRet >= 0 ? "var(--sea)" : "var(--clay)" }}>{fmtBps(r.quoteRet * 1e4)}</td>
-                <td className="num">{fmtUsd(r.fair)}</td>
-                <td className="num">{fmtBps(r.devBps)}</td>
-                <td><span className={`flag ${r.wide ? "wide" : "ok"}`}>{r.wide ? "outside band" : "inside"}</span></td>
-              </tr>
-            ))}
+            {view.map((r) => {
+              const chg = meta[r.symbol]?.change24h ?? 0;
+              const dev = r.devBps;
+              return (
+                <tr key={r.symbol} className={sel === r.symbol ? "on" : ""} onClick={() => setSel(r.symbol)}>
+                  <td>
+                    <span className="tick">{r.ticker}</span>
+                    <span className="faint mono" style={{ fontSize: 10.5, marginLeft: 7 }}>r{r.ticker}</span>
+                  </td>
+                  <td className="num">{usd(r.quote)}</td>
+                  <td className={`num ${chg >= 0 ? "up" : "down"}`}>{(chg * 100).toFixed(2)}%</td>
+                  <td className="num dim">{usd(r.anchor)}</td>
+                  <td className="num lamp">{usd(r.fair)}</td>
+                  <td className="num" style={{ color: r.wide ? "var(--down)" : "var(--text)" }}>
+                    {dev >= 0 ? "+" : ""}{dev.toFixed(0)} bps
+                  </td>
+                  <td>
+                    <span className={`flag ${r.wide ? "wide" : "ok"}`}>
+                      {r.wide ? "rich vs history" : "inside band"}
+                    </span>
+                  </td>
+                  <td className="num faint">{compact(r.volume)}</td>
+                </tr>
+              );
+            })}
+            {!view.length && (
+              <tr><td colSpan={8} style={{ textAlign: "center", padding: 34 }} className="faint">
+                {loading ? "Reading the venue…" : "Nothing to show."}
+              </td></tr>
+            )}
           </tbody>
         </table>
       </div>
-      <p className="note">
-        Fair value is the last regular-session close plus the part of the quote&apos;s move that history says
-        survives to the reopen. <b>Quote − fair</b> is what the venue is showing you that the record does not
-        support.
-      </p>
+      <div className="panel-note">
+        Fair value is tonight&apos;s quote shrunk toward the session close by weights fitted on the last 40 closed
+        windows. A name is flagged when the quote sits further from fair value than this hour&apos;s measured typical
+        error{band !== null ? ` of ±${band} bps` : ""}. Click a row to chart it.
+      </div>
     </section>
   );
 }

@@ -1,7 +1,10 @@
 /** Public Bitget spot endpoints. No key, no account, no signing. */
 const BASE = "https://api.bitget.com";
 
-export type Ticker = { symbol: string; lastPr: string; usdtVolume: string; change24h: string };
+export type Ticker = {
+  symbol: string; lastPr: string; usdtVolume: string; change24h: string;
+  high24h: string; low24h: string; open: string;
+};
 export type Candle = { t: number; o: number; h: number; l: number; c: number; v: number };
 
 async function get<T>(path: string, params: Record<string, string | number> = {}): Promise<T> {

@@ -1,24 +1,25 @@
 import type { Metadata } from "next";
+import { Instrument_Serif, Archivo, JetBrains_Mono } from "next/font/google";
 import "./globals.css";
+import { DeskProvider } from "@/lib/desk";
+import Shell from "@/components/Shell";
+
+const display = Instrument_Serif({ subsets: ["latin"], weight: "400", variable: "--font-display" });
+const ui = Archivo({ subsets: ["latin"], variable: "--font-ui" });
+const mono = JetBrains_Mono({ subsets: ["latin"], variable: "--font-mono" });
 
 export const metadata: Metadata = {
-  title: "Lighthouse — dark-hours desk for tokenized US equities",
+  title: "Lighthouse — dark-hours desk for tokenized US stocks",
   description:
-    "A validated reference price for US equities while their home market is dark. 20,934 graded forecasts against the 04:00 ET reopen.",
+    "Bitget's rToken prices outside US hours are indicative quotes, not transaction prices. Lighthouse measures how much of tonight's quote survives to the 04:00 ET reopen.",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
-      <head>
-        <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,400;6..72,500&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600&display=swap"
-        />
-      </head>
-      <body>{children}</body>
+    <html lang="en" className={`${display.variable} ${ui.variable} ${mono.variable}`}>
+      <body>
+        <DeskProvider><Shell>{children}</Shell></DeskProvider>
+      </body>
     </html>
   );
 }

@@ -1,6 +1,7 @@
 import { NextRequest } from "next/server";
 
-export const runtime = "edge";
+export const runtime = "nodejs";
+export const dynamic = "force-dynamic";
 
 /**
  * Research answers are generated against the desk state the page sends, and

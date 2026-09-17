@@ -1,155 +1,84 @@
 "use client";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { candles, pool, tickers, type Candle } from "@/lib/bitget";
-import { anchorClose, priceBoard, type Calibration, type Ledger, type Row } from "@/lib/model";
-import { darkWindow, fmtET, type DarkWindow } from "@/lib/time";
-import NightBand from "@/components/NightBand";
 import Board from "@/components/Board";
 import Instrument from "@/components/Instrument";
-import Record from "@/components/Record";
-import Ask from "@/components/Ask";
+import TrustCurve from "@/components/TrustCurve";
+import { useDesk } from "@/lib/desk";
+import { fmtET } from "@/lib/time";
+import Link from "next/link";
 
-const BOARD_SIZE = 24;
-
-export default function Page() {
-  const [cal, setCal] = useState<Calibration | null>(null);
-  const [led, setLed] = useState<Ledger | null>(null);
-  const [win, setWin] = useState<DarkWindow | null>(null);
-  const [rows, setRows] = useState<Row[]>([]);
-  const [factor, setFactor] = useState(0);
-  const [lam, setLam] = useState<[number, number]>([0, 0]);
-  const [band, setBand] = useState<number | null>(null);
-  const [sel, setSel] = useState<string | null>(null);
-  const [selCandles, setSelCandles] = useState<Candle[]>([]);
-  const [err, setErr] = useState<string | null>(null);
-  const [updated, setUpdated] = useState<Date | null>(null);
-
-  // Static evidence first, so the record renders even if the venue is unreachable.
-  useEffect(() => {
-    Promise.all([
-      fetch("/calibration.json").then((r) => r.json()),
-      fetch("/ledger.json").then((r) => r.json()).catch(() => null),
-    ]).then(([c, l]) => { setCal(c); setLed(l); });
-  }, []);
-
-  const refresh = useCallback(async (c: Calibration) => {
-    const w = darkWindow(new Date());
-    setWin(w);
-    const universe = c.universe.slice(0, BOARD_SIZE);
-    const ts = await tickers();
-    const px: Record<string, { last: number; vol: number }> = {};
-    for (const t of ts) px[t.symbol] = { last: +t.lastPr, vol: +t.usdtVolume };
-
-    const raw = (await pool(universe, 6, async (sym) => {
-      const cs = await candles(sym, "1h", 72);
-      const anchor = anchorClose(cs, w);
-      if (!anchor) return null;
-      let quote = px[sym]?.last;
-      if (!w.active) {
-        // Window has closed: replay its final quote rather than showing a live session price.
-        let last: number | null = null;
-        for (const k of cs) if (new Date(k.t) <= w.end) last = k.c;
-        quote = last ?? quote;
-      }
-      if (!quote) return null;
-      return { symbol: sym, anchor, quote, volume: px[sym]?.vol ?? 0 };
-    })).filter(Boolean) as { symbol: string; anchor: number; quote: number; volume: number }[];
-
-    if (!raw.length) { setErr("No quotes returned for this window."); return; }
-    const out = priceBoard(raw, c, w.elapsed);
-    setRows(out.rows); setFactor(out.factor); setLam(out.lam); setBand(out.band);
-    setUpdated(new Date());
-    setErr(null);
-    setSel((s) => s ?? out.rows[0]?.symbol ?? null);
-  }, []);
-
-  useEffect(() => {
-    if (!cal) return;
-    refresh(cal).catch(() => setErr("Couldn't reach Bitget. The measured record below is unaffected."));
-    const id = setInterval(() => refresh(cal).catch(() => {}), 60_000);
-    return () => clearInterval(id);
-  }, [cal, refresh]);
-
-  useEffect(() => {
-    if (!sel) return;
-    candles(sel, "1h", 96).then(setSelCandles).catch(() => setSelCandles([]));
-  }, [sel]);
-
-  const selRow = useMemo(() => rows.find((r) => r.symbol === sel) ?? null, [rows, sel]);
-
-  const buildState = useCallback(() => {
-    if (!cal || !win) return "";
-    const top = rows.slice(0, 12).map((r) =>
-      `${r.ticker}: close ${r.anchor.toFixed(2)}, venue quote ${r.quote.toFixed(2)} (${(r.quoteRet * 1e4).toFixed(0)} bps), ` +
-      `fair value ${r.fair.toFixed(2)}, quote minus fair ${r.devBps.toFixed(0)} bps, ${r.wide ? "OUTSIDE" : "inside"} the band`
-    ).join("\n");
-    const H = led?.summary.by_horizon ?? {};
-    const g = cal.weekend_gap;
-    return `DESK STATE (all figures measured; do not invent others)
-Window: ${win.kind}, ${win.active ? "currently dark" : "closed, replaying"}, ${(win.elapsed * 100).toFixed(0)}% elapsed.
-Shrinkage in force: ${lam[0].toFixed(2)} on the common move, ${lam[1].toFixed(2)} on the name-specific move.
-Calibrated typical error at this hour: ${band ?? "n/a"} bps.
-Weekend repricing: median ${g.median_bps.toFixed(0)} bps, p90 ${g.p90_bps.toFixed(0)} bps, ${(g.share_over_200bps * 100).toFixed(0)}% exceed 200 bps.
-Walk-forward median abs error vs the 04:00 ET reopen:
-${Object.entries(H).map(([k, v]) => `  ${Math.round(+k * 100)}% into window: assume-close-held ${v.last_close_medae.toFixed(1)} bps, venue quote ${v.venue_medae.toFixed(1)} bps, Lighthouse ${v.lighthouse_medae.toFixed(1)} bps`).join("\n")}
-
-BOARD
-${top}`;
-  }, [cal, win, rows, lam, band, led]);
+export default function DeskPage() {
+  const { rows, band, win, cal, led, loading } = useDesk();
+  const wide = rows.filter((r) => r.wide);
+  const worst = rows[0];
+  const medDev = rows.length
+    ? [...rows].map((r) => Math.abs(r.devBps)).sort((a, b) => a - b)[Math.floor(rows.length / 2)] : 0;
 
   return (
-    <div className="wrap">
-      <header className="mast">
-        <div className="markrow">
-          <svg width="34" height="34" viewBox="0 0 34 34" aria-hidden="true">
-            <path d="M17 4 L17 30" stroke="var(--line)" strokeWidth="1" />
-            <circle cx="17" cy="11" r="5" fill="var(--lamp)" />
-            <path d="M17 11 L33 3 L33 19 Z" fill="var(--lamp)" opacity=".2" />
-            <path d="M17 11 L1 3 L1 19 Z" fill="var(--lamp)" opacity=".2" />
-            <path d="M11 30 L23 30 L21 22 L13 22 Z" fill="none" stroke="var(--text)" strokeWidth="1.4" />
-          </svg>
-          <h1 className="serif">Lighthouse</h1>
-          <span className="eyebrow">Dark-hours desk</span>
-        </div>
-        <p className="thesis">
-          Tokenized US equities keep quoting after NYSE and Nasdaq go dark. Bitget says plainly that those
-          prices are <b>indicative quotes, not transaction prices</b>. This desk measures how much of
-          tonight&apos;s quote will still be true at the reopen — and marks the names where it won&apos;t.
+    <>
+      <section style={{ display: "grid", gap: 10, paddingTop: 4 }}>
+        <h1 className="serif" style={{ fontSize: 34, lineHeight: 1.1, maxWidth: "20ch" }}>
+          The tape is dark. The prices are not.
+        </h1>
+        <p className="prose" style={{ maxWidth: "62ch" }}>
+          Bitget keeps quoting tokenized US equities after NYSE and Nasdaq close, and says plainly that those
+          are <b>indicative quotes, not transaction prices</b>. This desk measures how much of tonight&apos;s quote
+          survives to the 04:00 ET reopen, marks the names where it won&apos;t, and publishes every forecast it
+          has ever graded.
         </p>
-        <div className="chips">
-          {win ? (
-            win.active ? (
-              <span className="chip live"><span className="dot" />
-                Market dark · {((+win.end - +win.asOf) / 3600e3).toFixed(1)}h to reopen</span>
-            ) : (
-              <span className="chip"><span className="dot" />US venues open — replaying the last dark window</span>
-            )
-          ) : (<span className="chip"><span className="dot" />Connecting to Bitget…</span>)}
-          {win && <span className="chip">{win.kind === "weekend" ? "Weekend window" : "Overnight window"} ·{" "}
-            {fmtET(win.start, { weekday: "short", hour: "2-digit", minute: "2-digit" })} →{" "}
-            {fmtET(win.end, { weekday: "short", hour: "2-digit", minute: "2-digit" })} ET</span>}
-          {cal && <span className="chip">Calibrated on {cal.n_windows.overnight} overnight + {cal.n_windows.weekend} weekend windows</span>}
-          {led && <span className="chip">{led.summary.n_rows.toLocaleString()} graded forecasts</span>}
-          {updated && <span className="chip">Updated {fmtET(updated, { hour: "2-digit", minute: "2-digit" })} ET</span>}
+      </section>
+
+      <div className="grid-4">
+        <Kpi label="Names watched" v={String(rows.length)}
+             sub={cal ? `${cal.universe_dropped_stale.length} dropped for stale books` : "…"} />
+        <Kpi label="Quotes outside the band" v={String(wide.length)} bad={wide.length > 0}
+             sub={worst ? `widest ${worst.ticker} at ${worst.devBps >= 0 ? "+" : ""}${worst.devBps.toFixed(0)} bps` : "—"} />
+        <Kpi label="Median quote − fair" v={`${medDev.toFixed(0)} bps`}
+             sub={band !== null ? `tonight's tolerance ±${band} bps` : "—"} />
+        <Kpi label="Window closes" v={win ? fmtET(win.end, { hour: "2-digit", minute: "2-digit" }) : "—"}
+             sub={win ? `${win.kind === "weekend" ? "weekend" : "overnight"} · ${(win.elapsed * 100).toFixed(0)}% elapsed` : "…"} lamp />
+      </div>
+
+      <div className="grid-2">
+        <Instrument />
+        <TrustCurve />
+      </div>
+
+      <Board />
+
+      <section className="panel">
+        <div className="panel-body" style={{ display: "flex", gap: 20, alignItems: "center", flexWrap: "wrap" }}>
+          <div style={{ flex: 1, minWidth: 260 }}>
+            <div className="label">What this is worth</div>
+            <p className="prose" style={{ marginTop: 6, marginBottom: 0 }}>
+              rTokens are accepted as collateral in Bitget&apos;s unified account at up to 95%. At night your margin
+              is marked at a price nobody traded on. <Link href="/collateral" style={{ color: "var(--lamp)" }}>
+              See what that does to your liquidation distance →</Link>
+            </p>
+          </div>
+          <div style={{ display: "flex", gap: 22 }}>
+            <Stat v={led ? led.summary.n_rows.toLocaleString() : "—"} k="graded forecasts" />
+            <Stat v={cal ? String(cal.n_windows.overnight) : "—"} k="closed windows" />
+            <Stat v={led ? `−${Math.abs(led.summary.by_horizon["0.75"].lighthouse_vs_lastclose_pct).toFixed(0)}%` : "—"} k="error vs baseline" lamp />
+          </div>
         </div>
-        {err && <div className="chip" style={{ borderColor: "var(--clay)", color: "var(--clay)" }}>{err}</div>}
-      </header>
+      </section>
 
-      {cal && win && <NightBand cal={cal} win={win} lam={lam} band={band} />}
-
-      <Board rows={rows} selected={sel} onSelect={setSel} factor={factor} lam={lam} band={band}
-        live={!!win?.active} />
-
-      {selRow && win && <Instrument row={selRow} candles={selCandles} win={win} band={band} />}
-
-      <Ask buildState={buildState} />
-
-      {cal && <Record cal={cal} led={led} />}
-
-      <footer>
-        <span>Lighthouse · Bitget AI Base Camp Hackathon S2 · AI Trading Desk</span>
-        <span><a href="https://github.com/martinvibes/lighthouse">github.com/martinvibes/lighthouse</a></span>
-      </footer>
-    </div>
+      {loading && !rows.length && <p className="faint" style={{ textAlign: "center" }}>Reading Bitget…</p>}
+    </>
   );
 }
+
+const Kpi = ({ label, v, sub, bad, lamp }: { label: string; v: string; sub: string; bad?: boolean; lamp?: boolean }) => (
+  <div className="kpi">
+    <div className="label">{label}</div>
+    <div className="v num" style={{ color: bad ? "var(--down)" : lamp ? "var(--lamp)" : undefined }}>{v}</div>
+    <div className="sub">{sub}</div>
+  </div>
+);
+
+const Stat = ({ v, k, lamp }: { v: string; k: string; lamp?: boolean }) => (
+  <div>
+    <div className="num" style={{ fontSize: 21, letterSpacing: "-.03em", color: lamp ? "var(--lamp)" : undefined }}>{v}</div>
+    <div className="label" style={{ marginTop: 2 }}>{k}</div>
+  </div>
+);

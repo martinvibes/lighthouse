@@ -1,84 +1,116 @@
 "use client";
-import { useEffect, useRef } from "react";
-import { createChart, ColorType, type IChartApi } from "lightweight-charts";
-import type { Candle } from "@/lib/bitget";
-import type { Row } from "@/lib/model";
-import { fmtET, type DarkWindow } from "@/lib/time";
+import { useEffect, useMemo, useState } from "react";
+import Chart from "./Chart";
+import GapMeter from "./GapMeter";
+import { candles, type Candle } from "@/lib/bitget";
+import { useDesk } from "@/lib/desk";
 
-const css = (n: string) => getComputedStyle(document.documentElement).getPropertyValue(n).trim();
-const fmtUsd = (v: number) => (v >= 1000 ? v.toFixed(0) : v.toFixed(2));
-const fmtBps = (v: number) => `${v >= 0 ? "+" : ""}${v.toFixed(0)} bps`;
+const TFS: [string, string][] = [["15min", "15m"], ["1h", "1H"], ["4h", "4H"], ["1day", "1D"]];
+const usd = (v: number) => v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
-/** Candles for one name, with the session close and the fair value drawn on. */
-export default function Instrument({ row, candles, win, band }: {
-  row: Row; candles: Candle[]; win: DarkWindow; band: number | null;
-}) {
-  const ref = useRef<HTMLDivElement>(null);
-  const chartRef = useRef<IChartApi | null>(null);
+export default function Instrument() {
+  const { rows, sel, meta, band, win, candles: hourly } = useDesk();
+  const [tf, setTf] = useState("1h");
+  const [ks, setKs] = useState<Candle[]>([]);
+  const row = useMemo(() => rows.find((r) => r.symbol === sel) ?? null, [rows, sel]);
 
   useEffect(() => {
-    if (!ref.current || !candles.length) return;
-    const chart = createChart(ref.current, {
-      layout: { background: { type: ColorType.Solid, color: "transparent" }, textColor: css("--muted"), fontFamily: "IBM Plex Mono, monospace", fontSize: 11 },
-      grid: { vertLines: { color: css("--grid") }, horzLines: { color: css("--grid") } },
-      rightPriceScale: { borderColor: css("--hair") },
-      timeScale: { borderColor: css("--hair"), timeVisible: true, secondsVisible: false },
-      crosshair: { mode: 1 },
-      height: 340,
-      autoSize: true,
-    });
-    chartRef.current = chart;
-    const s = chart.addCandlestickSeries({
-      upColor: css("--sea"), downColor: css("--clay"),
-      borderUpColor: css("--sea"), borderDownColor: css("--clay"),
-      wickUpColor: css("--sea"), wickDownColor: css("--clay"),
-      priceFormat: { type: "price", precision: 2, minMove: 0.01 },
-    });
-    s.setData(candles.map((c) => ({ time: (c.t / 1000) as never, open: c.o, high: c.h, low: c.l, close: c.c })));
-    s.createPriceLine({ price: row.anchor, color: css("--faint"), lineWidth: 1, lineStyle: 2, title: "session close" });
-    s.createPriceLine({ price: row.fair, color: css("--lamp"), lineWidth: 2, lineStyle: 0, title: "fair value" });
-    if (band) {
-      s.createPriceLine({ price: row.fair * (1 + band / 1e4), color: css("--lamp"), lineWidth: 1, lineStyle: 3, title: "" });
-      s.createPriceLine({ price: row.fair * (1 - band / 1e4), color: css("--lamp"), lineWidth: 1, lineStyle: 3, title: "" });
-    }
-    chart.timeScale().fitContent();
-    return () => { chart.remove(); chartRef.current = null; };
-  }, [row.symbol, candles, row.anchor, row.fair, band]);
+    if (!sel) return;
+    if (tf === "1h") { setKs(hourly); return; }
+    let live = true;
+    candles(sel, tf, 200).then((k) => live && setKs(k)).catch(() => live && setKs([]));
+    return () => { live = false; };
+  }, [sel, tf, hourly]);
+
+  const m = sel ? meta[sel] : undefined;
+  const lines = row ? [
+    { price: row.anchor, color: "var(--sea)", title: "session close", dashed: true },
+    { price: row.fair, color: "var(--lamp)", title: "fair value" },
+    ...(band !== null ? [
+      { price: row.fair * (1 + band / 1e4), color: "var(--line)", title: "+band", dashed: true },
+      { price: row.fair * (1 - band / 1e4), color: "var(--line)", title: "−band", dashed: true },
+    ] : []),
+  ] : [];
+
+  const rangePct = m && m.high > m.low && row
+    ? Math.min(100, Math.max(0, ((row.quote - m.low) / (m.high - m.low)) * 100)) : null;
 
   return (
-    <div className="chartgrid">
-      <div className="panel chartcard">
-        <div className="sechead">
-          <div>
-            <h2 className="serif">{row.ticker}</h2>
-            <p className="sub">{row.symbol} · hourly · {fmtET(win.start, { weekday: "short", hour: "2-digit", minute: "2-digit" })} → {fmtET(win.end, { weekday: "short", hour: "2-digit", minute: "2-digit" })} ET</p>
+    <section className="panel">
+      <div className="panel-head">
+        <h3 style={{ fontSize: 15 }}>{row ? row.ticker : "—"}</h3>
+        <span className="flag ok">r{row?.ticker ?? ""} · SPOT</span>
+        <span className="spacer" />
+        <div style={{ display: "flex", gap: 3 }}>
+          {TFS.map(([g, l]) => (
+            <button key={g} onClick={() => setTf(g)}
+              className="btn ghost"
+              style={{
+                padding: "4px 9px", fontSize: 11, borderRadius: 6,
+                ...(tf === g ? { color: "var(--lamp-ink)", borderColor: "var(--lamp)", background: "var(--lamp-wash)" } : {}),
+              }}>{l}</button>
+          ))}
+        </div>
+      </div>
+
+      <div className="panel-body" style={{ paddingBottom: 6 }}>
+        <div style={{ display: "flex", alignItems: "baseline", gap: 14, flexWrap: "wrap" }}>
+          <span className="num" style={{ fontSize: 40, letterSpacing: "-.04em", lineHeight: 1 }}>
+            {row ? usd(row.quote) : "—"}
+          </span>
+          {m && (
+            <span className={`num ${m.change24h >= 0 ? "up" : "down"}`} style={{ fontSize: 15 }}>
+              {m.change24h >= 0 ? "▲" : "▼"} {(m.change24h * 100).toFixed(2)}%
+            </span>
+          )}
+          <span className="spacer" style={{ flex: 1 }} />
+          {row && (
+            <span className="label" style={{ fontSize: 10.5 }}>
+              {win?.active ? "indicative quote · no US venue open" : "last quote of the dark window"}
+            </span>
+          )}
+        </div>
+
+        {m && m.high > 0 && (
+          <div style={{ marginTop: 14 }}>
+            <div style={{ display: "flex", justifyContent: "space-between", fontSize: 11 }} className="faint">
+              <span className="num">24h low {usd(m.low)}</span>
+              <span className="num">24h high {usd(m.high)}</span>
+            </div>
+            <div className="bar" style={{ marginTop: 5, position: "relative" }}>
+              <i style={{ width: `${rangePct ?? 0}%`, background: "linear-gradient(90deg, var(--sea), var(--lamp))" }} />
+            </div>
           </div>
-          <span className={`flag ${row.wide ? "wide" : "ok"}`}>{row.wide ? "outside band" : "inside band"}</span>
-        </div>
-        <div id="tvchart" ref={ref} />
-        <div className="legend">
-          <span><i className="swatch" style={{ background: "var(--faint)" }} />Last session close</span>
-          <span><i className="swatch" style={{ background: "var(--lamp)" }} />Lighthouse fair value</span>
-          {band ? <span><i className="swatch" style={{ background: "var(--lamp)", opacity: .5 }} />± {band.toFixed(0)} bps calibrated band</span> : null}
-        </div>
+        )}
       </div>
-      <div className="panel chartcard">
-        <h3 className="serif" style={{ fontSize: 20, marginBottom: 14 }}>What the desk sees</h3>
-        <div className="kv">
-          <div className="kvrow"><span className="k">Last session close</span><span className="v">{fmtUsd(row.anchor)}</span></div>
-          <div className="kvrow"><span className="k">Venue quote now</span><span className="v">{fmtUsd(row.quote)}</span></div>
-          <div className="kvrow"><span className="k">Quote has moved</span><span className="v" style={{ color: row.quoteRet >= 0 ? "var(--sea)" : "var(--clay)" }}>{fmtBps(row.quoteRet * 1e4)}</span></div>
-          <div className="kvrow"><span className="k">Lighthouse fair value</span><span className="v" style={{ color: "var(--lamp)" }}>{fmtUsd(row.fair)}</span></div>
-          <div className="kvrow"><span className="k">Quote − fair</span><span className="v" style={{ color: row.wide ? "var(--clay)" : undefined }}>{fmtBps(row.devBps)}</span></div>
-          <div className="kvrow"><span className="k">Calibrated band</span><span className="v">± {band ? band.toFixed(0) : "—"} bps</span></div>
-          <div className="kvrow"><span className="k">Factor loading (β)</span><span className="v">{row.beta.toFixed(2)}</span></div>
-        </div>
-        <p className="note" style={{ marginTop: 16, fontSize: 13 }}>
-          {row.wide
-            ? `The venue is showing ${fmtBps(row.devBps)} more move than the record supports at this hour of the night. Historically most of that is walked back by the reopen.`
-            : `The venue's quote is inside the calibrated band for this hour. Nothing here contradicts the record.`}
-        </p>
+
+      <div style={{ padding: "0 8px" }}>
+        <Chart candles={ks} lines={lines} height={330} />
       </div>
+
+      {row && band !== null && (
+        <div className="panel-body" style={{ borderTop: "1px solid var(--line-soft)" }}>
+          <div className="label" style={{ marginBottom: 6 }}>Quote against fair value</div>
+          <GapMeter devBps={row.devBps} band={band} />
+          <div className="grid-4" style={{ marginTop: 12 }}>
+            <Kv k="Session close" v={usd(row.anchor)} note="20:00 ET" />
+            <Kv k="Fair value" v={usd(row.fair)} note="shrunk toward close" lamp />
+            <Kv k="Quote − fair" v={`${row.devBps >= 0 ? "+" : ""}${row.devBps.toFixed(0)} bps`}
+                note={row.wide ? "outside the band" : "inside the band"} bad={row.wide} />
+            <Kv k="Beta to the tape" v={row.beta.toFixed(2)} note="fitted, not assumed" />
+          </div>
+        </div>
+      )}
+    </section>
+  );
+}
+
+function Kv({ k, v, note, lamp, bad }: { k: string; v: string; note: string; lamp?: boolean; bad?: boolean }) {
+  return (
+    <div>
+      <div className="label">{k}</div>
+      <div className="num" style={{ fontSize: 17, marginTop: 3, color: bad ? "var(--down)" : lamp ? "var(--lamp)" : undefined }}>{v}</div>
+      <div className="faint" style={{ fontSize: 11 }}>{note}</div>
     </div>
   );
 }
