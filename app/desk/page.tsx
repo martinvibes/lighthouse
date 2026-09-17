@@ -6,6 +6,7 @@ import Board from "@/components/Board";
 import Instrument from "@/components/Instrument";
 import Verdict from "@/components/Verdict";
 import { useDesk } from "@/lib/desk";
+import { fmtET } from "@/lib/time";
 
 function Countdown() {
   const { win } = useDesk();
@@ -56,6 +57,14 @@ export default function DeskPage() {
           </span>
         </div>
       </motion.header>
+
+      {win && !win.active && (
+        <div className="mt-4 hairline rounded-xl px-4 py-2.5 text-[12.5px] text-[var(--color-muted)]"
+             style={{ background: "rgba(255,255,255,0.025)" }}>
+          US markets are open right now, so these prices are real. Below is the board as it stood at the close
+          of the last dark window — {fmtET(win.end, { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" })} ET.
+        </div>
+      )}
 
       {err && (
         <div className="mt-4 hairline rounded-xl px-4 py-2.5 text-[12.5px]"

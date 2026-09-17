@@ -3,7 +3,7 @@
 **A validated reference price for US equities while their home market is dark.**
 
 Built for the [Bitget AI Base Camp Hackathon S2](https://bitget-ai.gitbook.io/bitgetai_hackathons2) — AI Trading Desk track.
-**Live desk:** https://claude.ai/artifact/JioxixSGkFcqL4msSkuFyb
+**Live desk:** https://lighthouse-desk.vercel.app
 
 ---
 
