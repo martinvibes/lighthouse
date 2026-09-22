@@ -1,0 +1,116 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 980 626" width="980" height="626" font-family="ui-sans-serif, -apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#4ee6a8"/>
+    </marker>
+    <marker id="b" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#5f7b70"/>
+    </marker>
+  </defs>
+
+  <rect width="980" height="626" fill="#080b0a"/>
+
+  <text x="40" y="34" fill="#4ee6a8" font-size="17" font-weight="700" letter-spacing="-0.4">Lighthouse</text>
+  <text x="132" y="34" fill="#5f7b70" font-size="12.5">· research offline, desk in the browser, nothing between them but JSON</text>
+
+  <!-- ── sources ── -->
+  <g>
+    <rect x="40" y="56" width="430" height="58" rx="10" fill="#0e1513" stroke="#1f3a30"/>
+    <text x="58" y="79" fill="#e8f0ec" font-size="13" font-weight="600">Bitget public spot API</text>
+    <text x="58" y="98" fill="#5f7b70" font-size="11" font-family="ui-monospace, Menlo, monospace">/api/v2/spot/market/{tickers,candles} · no key, CORS-open</text>
+
+    <rect x="510" y="56" width="430" height="58" rx="10" fill="#0e1513" stroke="#1f3a30"/>
+    <text x="528" y="79" fill="#e8f0ec" font-size="13" font-weight="600">Bitget agent server</text>
+    <text x="528" y="98" fill="#5f7b70" font-size="11" font-family="ui-monospace, Menlo, monospace">agent.bitget.com/mcp · guide + do_query, keyless</text>
+  </g>
+
+  <!-- ── research ── -->
+  <rect x="40" y="152" width="900" height="132" rx="12" fill="#0b110f" stroke="#182c25"/>
+  <text x="58" y="175" fill="#4ee6a8" font-size="10.5" font-weight="700" letter-spacing="1.3">RESEARCH · PYTHON, OFFLINE</text>
+  <g font-size="11.5">
+    <rect x="56" y="188" width="203" height="80" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="70" y="209" fill="#e8f0ec" font-weight="600" font-family="ui-monospace, Menlo, monospace" font-size="11.5">fetch.py</text>
+    <text x="70" y="229" fill="#7d938b" font-size="10.5">hourly candles, 60 pages</text>
+    <text x="70" y="245" fill="#7d938b" font-size="10.5">cached to data/cache</text>
+
+    <rect x="277" y="188" width="203" height="80" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="291" y="209" fill="#e8f0ec" font-weight="600" font-family="ui-monospace, Menlo, monospace" font-size="11.5">dataset.py</text>
+    <text x="291" y="229" fill="#7d938b" font-size="10.5">20:00 → 04:00 ET windows</text>
+    <text x="291" y="245" fill="#7d938b" font-size="10.5">quote_at() never looks ahead</text>
+
+    <rect x="498" y="188" width="203" height="80" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="512" y="209" fill="#e8f0ec" font-weight="600" font-family="ui-monospace, Menlo, monospace" font-size="11.5">models.py</text>
+    <text x="512" y="229" fill="#7d938b" font-size="10.5">common + idio split</text>
+    <text x="512" y="245" fill="#7d938b" font-size="10.5">shrinkage fit on MedAE</text>
+
+    <rect x="719" y="188" width="203" height="80" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="733" y="209" fill="#e8f0ec" font-weight="600" font-family="ui-monospace, Menlo, monospace" font-size="11.5">score · ledger</text>
+    <text x="733" y="229" fill="#7d938b" font-size="10.5">walk-forward, trailing 40</text>
+    <text x="733" y="245" fill="#7d938b" font-size="10.5">20,934 graded forecasts</text>
+  </g>
+  <path d="M259 228 L277 228" stroke="#5f7b70" stroke-width="1.2" marker-end="url(#b)"/>
+  <path d="M480 228 L498 228" stroke="#5f7b70" stroke-width="1.2" marker-end="url(#b)"/>
+  <path d="M701 228 L719 228" stroke="#5f7b70" stroke-width="1.2" marker-end="url(#b)"/>
+
+  <!-- ── artefacts ── -->
+  <rect x="40" y="322" width="900" height="104" rx="12" fill="#0b110f" stroke="#182c25"/>
+  <text x="58" y="345" fill="#4ee6a8" font-size="10.5" font-weight="700" letter-spacing="1.3">ARTEFACTS · public/ — THE ONLY NUMBERS THE DESK TRUSTS</text>
+  <g font-size="11">
+    <rect x="56" y="358" width="203" height="52" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="70" y="379" fill="#e8f0ec" font-family="ui-monospace, Menlo, monospace" font-size="11">calibration.json</text>
+    <text x="70" y="396" fill="#7d938b" font-size="10.5">λ per bucket, β, bands</text>
+
+    <rect x="277" y="358" width="203" height="52" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="291" y="379" fill="#e8f0ec" font-family="ui-monospace, Menlo, monospace" font-size="11">tails.json</text>
+    <text x="291" y="396" fill="#7d938b" font-size="10.5">measured error tails</text>
+
+    <rect x="498" y="358" width="203" height="52" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="512" y="379" fill="#e8f0ec" font-family="ui-monospace, Menlo, monospace" font-size="11">ledger.json</text>
+    <text x="512" y="396" fill="#7d938b" font-size="10.5">the scored record</text>
+
+    <rect x="719" y="358" width="203" height="52" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="733" y="379" fill="#e8f0ec" font-family="ui-monospace, Menlo, monospace" font-size="11">ledger.csv</text>
+    <text x="733" y="396" fill="#7d938b" font-size="10.5">every forecast, 3.8 MB</text>
+  </g>
+
+  <!-- ── desk ── -->
+  <rect x="40" y="464" width="900" height="140" rx="12" fill="#0b110f" stroke="#182c25"/>
+  <text x="58" y="487" fill="#4ee6a8" font-size="10.5" font-weight="700" letter-spacing="1.3">DESK · NEXT.JS 16 / REACT 19 — THE BOARD RUNS ENTIRELY IN THE BROWSER</text>
+  <g font-size="11">
+    <rect x="56" y="500" width="203" height="52" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="70" y="521" fill="#e8f0ec" font-family="ui-monospace, Menlo, monospace" font-size="11">lib/desk.tsx</text>
+    <text x="70" y="538" fill="#7d938b" font-size="10.5">polls the venue, 45 s</text>
+
+    <rect x="277" y="500" width="203" height="52" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="291" y="521" fill="#e8f0ec" font-family="ui-monospace, Menlo, monospace" font-size="11">lib/model.ts</text>
+    <text x="291" y="538" fill="#7d938b" font-size="10.5">priceBoard() — same math</text>
+
+    <rect x="498" y="500" width="203" height="52" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="512" y="521" fill="#e8f0ec" font-family="ui-monospace, Menlo, monospace" font-size="11">lib/risk.ts</text>
+    <text x="512" y="538" fill="#7d938b" font-size="10.5">exceedProb() off the tails</text>
+
+    <rect x="719" y="500" width="203" height="52" rx="8" fill="#101815" stroke="#1f3a30"/>
+    <text x="733" y="521" fill="#e8f0ec" font-size="11" font-weight="600">6 routes</text>
+    <text x="733" y="538" fill="#7d938b" font-size="10.5">desk · collateral · record</text>
+
+    <rect x="56" y="562" width="424" height="30" rx="8" fill="#0e1513" stroke="#1f3a30"/>
+    <text x="70" y="582" fill="#9db3a9" font-size="10.5"><tspan font-family="ui-monospace, Menlo, monospace" fill="#e8f0ec">/api/events</tspan>  earnings calendar over MCP, 30 min cache</text>
+
+    <rect x="498" y="562" width="424" height="30" rx="8" fill="#0e1513" stroke="#1f3a30"/>
+    <text x="512" y="582" fill="#9db3a9" font-size="10.5"><tspan font-family="ui-monospace, Menlo, monospace" fill="#e8f0ec">/api/ask</tspan>  analyst — every cited figure re-checked</text>
+  </g>
+
+  <!-- ── flow arrows ── -->
+  <path d="M255 114 L255 152" stroke="#4ee6a8" stroke-width="1.4" marker-end="url(#a)"/>
+  <path d="M820 284 L820 322" stroke="#4ee6a8" stroke-width="1.4" marker-end="url(#a)"/>
+  <path d="M490 426 L490 464" stroke="#4ee6a8" stroke-width="1.4" marker-end="url(#a)"/>
+  <text x="500" y="450" fill="#5f7b70" font-size="10">fetched as static JSON</text>
+
+  <!-- live board reads the venue directly -->
+  <path d="M40 85 L20 85 L20 526 L40 526" fill="none" stroke="#2f5449" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#b)"/>
+  <text x="26" y="320" fill="#5f7b70" font-size="9.5" transform="rotate(-90 26 320)" text-anchor="middle">live quotes, browser → venue</text>
+
+  <!-- mcp down the right -->
+  <path d="M940 85 L960 85 L960 577 L922 577" fill="none" stroke="#2f5449" stroke-width="1.2" stroke-dasharray="4 3" marker-end="url(#b)"/>
+  <text x="954" y="330" fill="#5f7b70" font-size="9.5" transform="rotate(-90 954 330)" text-anchor="middle">MCP, server-side only</text>
+</svg>
