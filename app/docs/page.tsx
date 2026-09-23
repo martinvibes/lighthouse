@@ -173,7 +173,7 @@ export default function Docs() {
             )}
             <P>
               Across {led ? led.summary.n_rows.toLocaleString() : "20,934"} graded forecasts on{" "}
-              {cal?.n_windows.overnight ?? "—"} closed windows, Lighthouse beats the venue&apos;s own quote on
+              {cal?.validation?.["0.90"]?.n_scored ?? "—"} scored windows, Lighthouse beats the venue&apos;s own quote on
               roughly 54 to 56% of individual forecasts. That is a real edge and a modest one, and we would
               rather publish it at that size than dress it up.
             </P>

@@ -29,7 +29,7 @@ export default function Record() {
   const deep = led?.summary.by_horizon["0.90"];
   const tiles = [
     { k: "forecasts graded", v: led ? led.summary.n_rows.toLocaleString() : "—", s: "each scored before its open was known" },
-    { k: "names covered", v: cal ? String(cal.universe.length) : "—", s: cal ? `${cal.span[0]} → ${cal.span[1]}` : "" },
+    { k: "names covered", v: cal ? String(cal.universe.length) : "—", s: cal?.validation?.["0.90"] ? `over ${cal.validation["0.90"].n_scored} scored windows, ${cal.validation["0.90"].from} → ${cal.validation["0.90"].to}` : "" },
     { k: "better than the venue", v: deep ? `${(deep.lighthouse_beats_venue_share * 100).toFixed(1)}%` : "—", s: "of forecasts near the open" },
   ];
 

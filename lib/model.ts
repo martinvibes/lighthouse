@@ -11,6 +11,9 @@ export type Calibration = {
   lambda: Record<string, [number, number]>;
   band_bps: Record<string, number | null>;
   beta: Record<string, number>;
+  /** Walk-forward record. `n_windows` is every closed window; `n_scored` excludes
+   *  the warm-up windows that only ever trained, so it is what the ledger covers. */
+  validation: Record<string, { n_windows: number; n_scored: number; from: string; to: string }>;
   overshoot: Record<string, { median_quote_move_bps: number; median_realised_bps: number; ratio: number }>;
   weekend_gap: { n: number; median_bps: number; p90_bps: number; share_over_200bps: number };
 };

@@ -8,7 +8,9 @@ Lighthouse estimates what each name is actually worth during those eight hours, 
 
 **Live desk:** https://lighthouse-desk.vercel.app
 **Built for:** [Bitget AI Base Camp Hackathon S2](https://bitget-ai.gitbook.io/bitgetai_hackathons2) — AI Trading Desk, Decision Stress Testing
-**The record:** 20,934 graded forecasts, 47 names, 142 overnight windows, `2025-11-19 → 2026-09-16`
+**The record:** 20,934 graded forecasts, 47 names, 117 scored windows, `2026-02-18 → 2026-09-16`
+
+The dataset holds 142 closed overnight windows back to `2025-11-19`. The first 25 are the walk-forward warm-up — they train and are never scored — so the published record starts at the 26th. Every figure below is counted off [`data/ledger.csv`](data/ledger.csv), which ships in this repo.
 
 ---
 

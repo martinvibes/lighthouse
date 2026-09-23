@@ -137,7 +137,7 @@ export default function Landing() {
         <div className="text-center label mb-6">what the record is built on</div>
         <div className="max-w-[1000px] mx-auto px-5 grid grid-cols-2 md:grid-cols-4 gap-4">
           <Fact v={led ? led.summary.n_rows.toLocaleString() : "20,934"} k="graded forecasts" />
-          <Fact v={cal ? String(cal.n_windows.overnight) : "—"} k="closed dark windows" />
+          <Fact v={cal?.validation?.["0.90"] ? String(cal.validation["0.90"].n_scored) : "—"} k="scored dark windows" />
           <Fact v={cal ? String(cal.universe.length) : "—"} k="rToken names" />
           <Fact v="0" k="forecasts scored in-sample" c="var(--color-mint)" />
         </div>

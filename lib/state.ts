@@ -11,6 +11,8 @@ export function deskState(
   if (!cal || !win) return "";
   const g = cal.weekend_gap;
   const H = led?.summary.by_horizon ?? {};
+  // The ledger covers the scored windows only — the warm-up windows trained and were never graded.
+  const V = cal.validation?.["0.90"] ?? cal.validation?.[Object.keys(cal.validation ?? {})[0]];
   const track = new Map((led?.per_symbol ?? []).map((p) => [p.symbol, p]));
 
   const board = rows.map((r) => {
@@ -38,7 +40,8 @@ Calibrated typical error at this hour: ${band ?? "n/a"} bps. A quote further tha
 Common move priced across the whole tape tonight: the median name has moved ${rows.length ? ((rows.reduce((s, r) => s + r.quoteRet, 0) / rows.length) * 1e4).toFixed(0) : "0"} bps off its close.
 
 HOW GOOD ANY OF THIS IS — walk-forward median absolute error against the 04:00 ET reopen,
-over ${led?.summary.n_rows.toLocaleString() ?? 0} graded forecasts on ${cal.n_windows.overnight} closed windows (${cal.span[0].slice(0, 10)} to ${cal.span[1].slice(0, 10)}):
+over ${led?.summary.n_rows.toLocaleString() ?? 0} graded forecasts on ${V?.n_scored ?? "—"} scored windows (dark windows beginning ${V?.from ?? "—"} to ${V?.to ?? "—"}).
+The dataset holds ${cal.n_windows.overnight} closed overnight windows back to ${cal.span[0].slice(0, 10)}; the earliest ${V ? V.n_windows - V.n_scored : "—"} are walk-forward warm-up and were never scored:
 ${Object.entries(H).map(([k, v]) =>
   `  At ${Math.round(+k * 100)}% into the window: assuming the close held ${v.last_close_medae.toFixed(1)} bps, ` +
   `the venue's quote ${v.venue_medae.toFixed(1)} bps, Lighthouse ${v.lighthouse_medae.toFixed(1)} bps. ` +
